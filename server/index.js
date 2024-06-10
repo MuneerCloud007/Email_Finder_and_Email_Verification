@@ -12,12 +12,11 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const app=express();
 
-// Get the directory path of the current module
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Load environment variables from the .env file
-console.log(`${__dirname}\\.env`)
-dotenv.config({ path: `${__dirname}\\.env` });
+// // Load environment variables from the .env file
+// console.log(`${__dirname}\\.env`)
+dotenv.config({ path: `./.env` });
 
 
 // CORS options
