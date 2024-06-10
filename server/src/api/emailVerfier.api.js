@@ -5,7 +5,7 @@ import { scrapeController } from "../controller/emailverfier.controller.js";
 import checkAuthorization from "../utils/isAuthorized.js";
 
 // Define your routes
-api.post("/post",checkAuthorization, scrapeController); // Assuming you want to define a POST route here
+api.post("/post", scrapeController); // Assuming you want to define a POST route here
 
 // Export the router
 export default  api;

@@ -208,7 +208,7 @@ const WebscrapingData = (url1) => {
 
 
         puppeteer.launch({
-            headless: false,
+            headless: true,
             args: [
                 `--user-agent=${getRandomUserAgent()}`,
                 '--disable-features=site-per-process',

@@ -10,22 +10,12 @@ import  disposableEmailDetector  from 'disposable-email-detector';
 
 
 // Collect first name, last name, domain
-let firstName = process.argv[2];
-if (!firstName) {
-    firstName = readline.question("First name: ");
-}
-
-let lastName = process.argv[3];
-if (!lastName) {
-    lastName = readline.question("Last name: ");
-}
-
-let domainName = process.argv[4];
-if (!domainName) {
-    domainName = readline.question("Domain: ");
-}
+const wrapperFunEmailVerfier=async(firstName,lastName,domainName)=>{
 
 // Regex for names
+console.log(firstName)
+console.log(lastName);
+console.log(domainName);
 const nameRegex = /^[a-zA-Z]+$/;
 
 // Regex for domain
@@ -34,13 +24,14 @@ const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 function regexCheck(regex, name, type) {
     while (!regex.test(name)) {
         console.log(`${name} is not a valid ${type}.`);
-        name = readline.question(`Please enter ${type} again: > `);
+        //Throw an error
+        
     }
 }
 
 // // Regex check
-// regexCheck(nameRegex, firstName, "first name");
-// regexCheck(nameRegex, lastName, "last name");
+ regexCheck(nameRegex, firstName, "first name");
+ regexCheck(nameRegex, lastName, "last name");
  regexCheck(domainRegex, domainName, "domain name");
 
 function formats(first, last, domain) {
@@ -139,9 +130,7 @@ async function verify(list) {
     return valid;
 }
 
-verify(emailsList).then(validList => {
-    returnValid(validList, emailsList);
-});
+const validList=await verify(emailsList).catch((err)=>console.log(err))
 
 function returnValid(valid, possible) {
     if (valid.length === 0) {
@@ -156,3 +145,7 @@ function returnValid(valid, possible) {
         valid.forEach(address => console.log(address));
     }
 }
+return validList
+}
+
+export default wrapperFunEmailVerfier;

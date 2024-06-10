@@ -1,10 +1,11 @@
 // src/controllers/webscrapeController.js
 import  WebscrapingData  from '../webscraping/webscrap.mjs';
 import ApiError from '../utils/ApiError.js';
-import URL from 'url';
+import {URL} from 'url';
+import wrapperFunEmailVerfier from "../email_verfication/emailVerfier.algo.js";
 
 const scrapeController = async (req, res, next) => {
-    const { url } = req.body;
+    const { url,firstName,lastName } = req.body;
     console.log("I am here =" + url);
 
     if (!url) {
@@ -24,23 +25,16 @@ const scrapeController = async (req, res, next) => {
         console.log(domain)
 
         //Webscraping is completed
+        const arr=await wrapperFunEmailVerfier(firstName,lastName,domain);
 
         //Now email Verification process has to be started....
-
-
-
-
-
-
-
-
-
         res.status(200).json({
             sucess: true,
-            data: domain,
+            data: arr,
 
         });
     } catch (error) {
+        console.log(error)
         next(ApiError.internal('Failed to scrape the website'));
     }
 };
