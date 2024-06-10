@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import { errorHandler, ApiError } from './src/utils/errorHandler.js';
+import { errorHandler } from './src/utils/errorHandler.js';
 import emailVerifier from './src/api/emailVerfier.api.js';
 import DbConnection from './src/utils/dbconnection.js';
 import userApi from './src/api/user.api.js';
