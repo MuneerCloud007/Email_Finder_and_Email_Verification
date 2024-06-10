@@ -9,7 +9,7 @@ import DbConnection from './src/utils/dbconnection.js';
 import userApi from './src/api/user.api.js';
 
 // Load environment variables from the .env file
-dotenv.config({ path: './.env' });
+dotenv.config();
 
 const app = express();
 
