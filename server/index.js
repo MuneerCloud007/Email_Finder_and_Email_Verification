@@ -8,15 +8,18 @@ import { errorHandler } from './src/utils/errorHandler.js';
 import emailVerifier from './src/api/emailVerfier.api.js';
 import DbConnection from './src/utils/dbconnection.js';
 import userApi from './src/api/user.api.js';
-// import { fileURLToPath } from 'url';
-// import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 const app=express();
 
-// const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// // Load environment variables from the .env file
-// console.log(`${__dirname}\\.env`)
-dotenv.config({ path: `./.env` });
+
+// Convert import.meta.url to __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables from the .env file
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 
 // CORS options
