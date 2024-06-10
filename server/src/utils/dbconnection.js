@@ -3,7 +3,6 @@ const db = process.env.mongoDB_url || "mongodb+srv://cloudvandana:cloudvandana@c
 
 const connectDB = async () => {
     try {
-        console.log(db)
         await mongoose.connect(db);
         console.log('MongoDB connected...');
     } catch (err) {
