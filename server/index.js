@@ -3,19 +3,13 @@ import cors from 'cors';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import { errorHandler } from './src/utils/errorHandler.js';
+import { errorHandler, ApiError } from './src/utils/errorHandler.js';
 import emailVerifier from './src/api/emailVerfier.api.js';
 import DbConnection from './src/utils/dbconnection.js';
 import userApi from './src/api/user.api.js';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-// Convert import.meta.url to __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Load environment variables from the .env file
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: './.env' });
 
 const app = express();
 
@@ -36,6 +30,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Basic test route
+app.get('/test', (req, res) => {
+  res.send('Server is running!');
+});
+
 // Connect to the database
 DbConnection().then(() => {
   const PORT = process.env.PORT || 4000;
@@ -44,6 +43,7 @@ DbConnection().then(() => {
   });
 }).catch((err) => {
   console.error("There is an issue with the MongoDB connection: ", err);
+  process.exit(1); // Exit the process with failure
 });
 
 // Routes
@@ -59,10 +59,16 @@ app.all('*', (req, res, next) => {
 app.use(errorHandler);
 
 // Serve static files in production
-// if (process.env.NODE_ENV === "production") {
-//   console.log("Production mode enabled");
-//   app.use(express.static(path.join(__dirname, "../client/dist")));
-//   app.get("/", (req, res) =>
-//     res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"))
-//   );
-// }
+if (process.env.NODE_ENV === "production") {
+  console.log("Production mode enabled");
+  app.use(express.static(path.join(__dirname, "../client/dist")));
+  app.get("/", (req, res) =>
+    res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"))
+  );
+}
+
+// Centralized error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
