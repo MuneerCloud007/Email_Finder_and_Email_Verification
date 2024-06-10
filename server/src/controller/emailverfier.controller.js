@@ -15,7 +15,6 @@ const scrapeController = async (req, res, next) => {
     try {
         console.log(url);
         const companyLink = await WebscrapingData(url);
-        console.log(companyLink);
 
         const urlString = companyLink;
         const parsedUrl = new URL(urlString.Link);
