@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import session from 'express-session';
+// import session from 'express-session';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -8,8 +8,8 @@ import { errorHandler } from './src/utils/errorHandler.js';
 import emailVerifier from './src/api/emailVerfier.api.js';
 import DbConnection from './src/utils/dbconnection.js';
 import userApi from './src/api/user.api.js';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+// import { fileURLToPath } from 'url';
+// import { dirname } from 'path';
 const app=express();
 
 // const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -44,12 +44,12 @@ DbConnection().then(() => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(session({
-  secret: 'cloudvandana',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true }
-}));
+// app.use(session({
+//   secret: 'cloudvandana',
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: { secure: true }
+// }));
 
 // Routes
 app.use("/api/v1/user",userApi)
