@@ -56,7 +56,7 @@ const WebscrapingData = (url1) => {
             options = {
                 args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
                 defaultViewport: chromium.defaultViewport,
-                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+                executablePath: "/usr/bin/google-chrome-stable",
 
                 headless: true,
                 ignoreHTTPSErrors: true,
