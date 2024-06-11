@@ -5,12 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./index.js",
-    "vercel-build": "echo hello"
-  },
-  "engines": {
-    "node": "^14"
-  },
+    "start": "nodemon ./index.js"
+    },
+ 
   "type": "module",
   "keywords": [],
   "author": "",
