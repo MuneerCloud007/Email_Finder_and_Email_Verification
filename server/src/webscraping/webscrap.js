@@ -56,7 +56,7 @@ const WebscrapingData = (url1) => {
         console.log("PUTUTTT")
 
         puppeteerExtra.launch({
-            headless: true,
+            headless: false,
             args: [
                 `--user-agent=${getRandomUserAgent()}`,
                 '--disable-features=site-per-process',
