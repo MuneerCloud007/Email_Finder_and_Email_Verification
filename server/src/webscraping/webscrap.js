@@ -49,6 +49,7 @@ const WebscrapingData = (url1) => {
         console.log("I am inside Puppeteer");
         let options = {};
         console.log(process.env.NODE_ENV)
+        console.log(puppeteer.executablePath());
 
 
 
@@ -59,10 +60,10 @@ const WebscrapingData = (url1) => {
                 defaultViewport: chromium.defaultViewport,
                 executablePath:
                 process.env.NODE_ENV === "production"
-                  ? process.env.PUPPETEER_EXECUTABLE_PATH
+                  ? puppeteer.executablePath()
                   : puppeteer.executablePath(),
 
-                headless: true,
+                headless: false,
                 ignoreHTTPSErrors: true,
             };
         
@@ -98,8 +99,8 @@ const WebscrapingData = (url1) => {
                     }
                 }
 
-                await safeGoto(navigate_urls[Math.floor(Math.random() * navigate_urls.length)], { waitUntil: 'load', timeout: 20000 });
-                await new Promise(r => setTimeout(r, pageDelays[Math.floor(Math.random() * pageDelays.length)]));
+                // await safeGoto(navigate_urls[Math.floor(Math.random() * navigate_urls.length)], { waitUntil: 'load', timeout: 20000 });
+                // await new Promise(r => setTimeout(r, pageDelays[Math.floor(Math.random() * pageDelays.length)]));
 
                 await safeGoto(url1, { waitUntil: 'load', timeout: 20000 });
                 await page.waitForSelector('a', { timeout: 1800000 });
