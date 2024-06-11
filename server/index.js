@@ -61,13 +61,13 @@ app.all('*', (req, res, next) => {
 app.use(errorHandler);
 
 // Serve static files in production
-if (process.env.NODE_ENV === "production") {
-  console.log("Production mode enabled");
-  app.use(express.static(path.join(__dirname, "../client/dist")));
-  app.get("/", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"))
-  );
-}
+// if (process.env.NODE_ENV === "production") {
+//   console.log("Production mode enabled");
+//   app.use(express.static(path.join(__dirname, "../client/dist")));
+//   app.get("/", (req, res) =>
+//     res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"))
+//   );
+// }
 
 // Centralized error handling
 app.use((err, req, res, next) => {
