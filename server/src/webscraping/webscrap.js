@@ -6,11 +6,15 @@ import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
 import puppeteer_extra_plugin_anonymize_ua from 'puppeteer-extra-plugin-anonymize-ua';
 import { promises as fs } from 'fs';
 import { promisify } from 'util';
-import { timeout } from 'puppeteer-core';
 import rimrafModule from 'rimraf';
+import chromium from "@sparticuz/chromium";
 
 const rimraf = promisify(rimrafModule);
+chromium.setHeadlessMode = true;
+chromium.setGraphicsMode = false;
 
+// Optional: If you'd like to disable webgl, true is the default.
+chromium.setGraphicsMode = false;
 
 puppeteer.use(StealthPlugin())
 
@@ -208,14 +212,15 @@ const WebscrapingData = (url1) => {
 
 
         puppeteer.launch({
-            headless: true,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
             args: [
                 `--user-agent=${getRandomUserAgent()}`,
                 '--disable-features=site-per-process',
                 '--v=1',
             ],
             timeout: 600000,
-
             ignoreHTTPSErrors: true
         }).then(async browser => {
             const page = await browser.newPage()
@@ -312,9 +317,17 @@ const WebscrapingData = (url1) => {
             }
 
             console.log(`All done, check the screenshots. ✨`)
+        }).catch((err)=>{
+            console.log("ERROR!!! in puputter")
+            console.log(err)
+
+            console.log("I am here")
         })
     }))
+
+
 }
+
 export default WebscrapingData;
 
 

@@ -1,5 +1,5 @@
 // src/controllers/webscrapeController.js
-import  WebscrapingData  from '../webscraping/webscrap.mjs';
+import  WebscrapingData  from '../webscraping/webscrap.js';
 import ApiError from '../utils/ApiError.js';
 import {URL} from 'url';
 import wrapperFunEmailVerfier from "../email_verfication/emailVerfier.algo.js";
