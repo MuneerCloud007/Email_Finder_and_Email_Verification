@@ -54,6 +54,7 @@ const WebscrapingData = (url1) => {
         await clearCache();
         console.log("I am inside Puppeteer");
         console.log(chromium.headless);
+        console.log("PUTUTTT")
          console.log(await chromium.executablePath);
 
         puppeteerExtra.launch({
