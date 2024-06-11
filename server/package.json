@@ -8,6 +8,9 @@
     "start": "nodemon ./index.js",
     "vercel-build": "echo hello"
   },
+  "engines": {
+    "node": "^14"
+  },
   "type": "module",
   "keywords": [],
   "author": "",
