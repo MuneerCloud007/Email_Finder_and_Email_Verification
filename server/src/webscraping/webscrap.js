@@ -48,6 +48,7 @@ const WebscrapingData = (url1) => {
         await clearCache();
         console.log("I am inside Puppeteer");
         let options = {};
+        console.log(process.env.NODE_ENV)
 
 
 
@@ -56,7 +57,10 @@ const WebscrapingData = (url1) => {
             options = {
                 args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
                 defaultViewport: chromium.defaultViewport,
-                executablePath: "/usr/bin/google-chrome-stable",
+                executablePath:
+                process.env.NODE_ENV === "production"
+                  ? process.env.PUPPETEER_EXECUTABLE_PATH
+                  : puppeteer.executablePath(),
 
                 headless: true,
                 ignoreHTTPSErrors: true,
@@ -66,7 +70,7 @@ const WebscrapingData = (url1) => {
         console.log(options)
 
         puppeteer.launch(options).then(async browser => {
-            console.log("PUputeer is launched")
+            console.log("Puputeer is launched")
             const page = await browser.newPage();
             await page.setViewport({ width: 800, height: 600 });
 
