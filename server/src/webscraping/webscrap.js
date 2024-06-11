@@ -1,11 +1,8 @@
-import puppeteerExtra from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
-import puppeteer_extra_plugin_anonymize_ua from 'puppeteer-extra-plugin-anonymize-ua';
+
 import { promises as fs } from 'fs';
 import { promisify } from 'util';
 import rimrafModule from 'rimraf';
-import chromium from 'chrome-aws-lambda';
+import chromium from "@sparticuz/chromium";
 import puppeteer from 'puppeteer-core';
 
 import { fileURLToPath } from 'url';
@@ -14,10 +11,6 @@ import { dirname } from 'path';
 const rimraf = promisify(rimrafModule);
 chromium.setHeadlessMode = true;
 chromium.setGraphicsMode = false;
-
-puppeteerExtra.use(StealthPlugin());
-puppeteerExtra.use(AdblockerPlugin({ blockTrackers: true }));
-puppeteerExtra.use(puppeteer_extra_plugin_anonymize_ua());
 
 async function clearCache() {
     await rimraf('./.cache/puppeteer');
@@ -49,26 +42,48 @@ const navigate_urls = [
     "https://www.w3schools.com/jsref/jsref_obj_array.asp",
 ];
 
+
 const WebscrapingData = (url1) => {
     return new Promise(async (resolve, reject) => {
         await clearCache();
         console.log("I am inside Puppeteer");
-        console.log("PUTUTTT")
+        let options = {};
 
-        puppeteerExtra.launch({
-            headless: false,
-            args: [
-                `--user-agent=${getRandomUserAgent()}`,
-                '--disable-features=site-per-process',
-                '--v=1',
-            ],
-            timeout: 600000,
-            ignoreHTTPSErrors: true
-        }).then(async browser => {
+
+
+
+
+        if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+            console.log("I AM ENV");
+            options = {
+                args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath,
+                headless: true,
+                ignoreHTTPSErrors: true,
+            };
+        }
+        else {
+            options = {
+                headless: false,
+                args: [
+                    `--user-agent=${getRandomUserAgent()}`,
+                    '--disable-features=site-per-process',
+                    '--v=1',
+                ],
+                timeout: 600000,
+                ignoreHTTPSErrors: true
+            }
+
+        }
+        console.log(options)
+
+        puppeteer.launch(options).then(async browser => {
+            console.log("PUputeer is launched")
             const page = await browser.newPage();
             await page.setViewport({ width: 800, height: 600 });
 
-            
+
             const cookie = {
                 name: 'li_at',
                 value: 'AQEFAQ8BAAAAAA_9W-EAAAGP8vkCmgAAAZAXBY8XVgAAsnVybjpsaTplbnRlcnByaXNlQXV0aFRva2VuOmVKeGpaQUFDbHFhTU15Q2EzWUJ0R29nV1ZQK3hrUkhFU09WY1hnaG1SSzV3ZFdGZ0JBQ2VrZ2VEXnVybjpsaTplbnRlcnByaXNlUHJvZmlsZToodXJuOmxpOmVudGVycHJpc2VBY2NvdW50Ojc1NjU1MzcyLDEyMDU4NzkyNiledXJuOmxpOm1lbWJlcjo4ODUyMTEzODVAEnM090WcGzcHVbH0PYjGOdpeaPYJKwGByL1txB_mYFDjIQgYGs7n7bcUB8ZQh5J_X2E5Kj3ObgRXCGYKMfTdoBEME8EdY8_JiJKewOv4IpQdJQuKaIwn9eWzkuLFFsoAibefSHN4cwqEFv3lyHn87NRMB9ZNyc0pUl00dB7P-oQNVlWOQBuZ2vel2E75b1jWAvaK',
@@ -123,7 +138,7 @@ const WebscrapingData = (url1) => {
             }
 
             console.log(`All done, check the screenshots. ✨`);
-        }).catch((err)=>{
+        }).catch((err) => {
             console.log("I am error puputeer");
             console.log(err);
             console.log("After error puputeer");
@@ -132,6 +147,7 @@ const WebscrapingData = (url1) => {
 };
 
 export default WebscrapingData;
+
 
 
 
