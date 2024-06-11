@@ -212,7 +212,6 @@ const WebscrapingData = (url1) => {
             args: [
                 `--user-agent=${getRandomUserAgent()}`,
                 '--disable-features=site-per-process',
-                '--enable-logging',
                 '--v=1',
             ],
             timeout: 600000,

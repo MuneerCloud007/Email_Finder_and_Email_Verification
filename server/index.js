@@ -7,6 +7,7 @@ import { errorHandler } from './src/utils/errorHandler.js';
 import emailVerifier from './src/api/emailVerfier.api.js';
 import DbConnection from './src/utils/dbconnection.js';
 import userApi from './src/api/user.api.js';
+import ApiError from './src/utils/ApiError.js';
 
 // Load environment variables from the .env file
 dotenv.config();
@@ -52,6 +53,7 @@ app.use("/api/v1/emailVerifier", emailVerifier);
 
 // Wildcard route for undefined routes
 app.all('*', (req, res, next) => {
+  console.log("I am inside wildcard");
   next(ApiError.notFound('Route not found'));
 });
 
