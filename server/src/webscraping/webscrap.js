@@ -53,16 +53,11 @@ const WebscrapingData = (url1) => {
     return new Promise(async (resolve, reject) => {
         await clearCache();
         console.log("I am inside Puppeteer");
-        console.log(chromium.headless);
         console.log("PUTUTTT")
-         console.log(await chromium.executablePath);
 
         puppeteerExtra.launch({
-            defaultViewport: chromium.defaultViewport,
-            headless: false,
-            executablePath: await chromium.executablePath,
+            headless: true,
             args: [
-                ...chromium.args,
                 `--user-agent=${getRandomUserAgent()}`,
                 '--disable-features=site-per-process',
                 '--v=1',
