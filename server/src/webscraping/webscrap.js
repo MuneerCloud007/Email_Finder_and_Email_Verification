@@ -3,7 +3,7 @@ import { promises as fs } from 'fs';
 import { promisify } from 'util';
 import rimrafModule from 'rimraf';
 import chromium from "@sparticuz/chromium";
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -56,7 +56,8 @@ const WebscrapingData = (url1) => {
             options = {
                 args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
                 defaultViewport: chromium.defaultViewport,
-                executablePath: await chromium.executablePath,
+                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+
                 headless: true,
                 ignoreHTTPSErrors: true,
             };
