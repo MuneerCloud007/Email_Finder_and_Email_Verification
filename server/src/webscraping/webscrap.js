@@ -63,7 +63,7 @@ const WebscrapingData = (url1) => {
                   ? puppeteer.executablePath()
                   : puppeteer.executablePath(),
 
-                headless: false,
+                headless: true,
                 ignoreHTTPSErrors: true,
             };
         
