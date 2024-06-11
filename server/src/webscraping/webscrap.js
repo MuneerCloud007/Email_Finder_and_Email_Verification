@@ -53,8 +53,6 @@ const WebscrapingData = (url1) => {
 
 
 
-        if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-            console.log("I AM ENV");
             options = {
                 args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
                 defaultViewport: chromium.defaultViewport,
@@ -62,20 +60,8 @@ const WebscrapingData = (url1) => {
                 headless: true,
                 ignoreHTTPSErrors: true,
             };
-        }
-        else {
-            options = {
-                headless: false,
-                args: [
-                    `--user-agent=${getRandomUserAgent()}`,
-                    '--disable-features=site-per-process',
-                    '--v=1',
-                ],
-                timeout: 600000,
-                ignoreHTTPSErrors: true
-            }
-
-        }
+        
+       
         console.log(options)
 
         puppeteer.launch(options).then(async browser => {
