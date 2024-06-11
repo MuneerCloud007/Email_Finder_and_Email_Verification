@@ -1,10 +1,23 @@
 {
     "version": 2,
-    "name": "SERVER_Email_VERFICATION",
+    "name": "SERVER_Email_VERIFICATION",
     "builds": [
-       { "src": "index.js", "use": "@vercel/node" }
+      {
+        "src": "index.js",
+        "use": "@vercel/node"
+      }
     ],
+    "functions": {
+      "api/*.js": {
+        "memory": 1024,
+        "maxDuration": 10
+      }
+    },
     "routes": [
-       { "src": "/(.*)", "dest": "/index.js" }
+      {
+        "src": "/(.*)",
+        "dest": "/index.js"
+      }
     ]
- }
+  }
+  
