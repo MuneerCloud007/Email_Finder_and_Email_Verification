@@ -1,15 +1,13 @@
-
-
-
-
-import puppeteer from 'puppeteer-extra';
+import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
 import puppeteer_extra_plugin_anonymize_ua from 'puppeteer-extra-plugin-anonymize-ua';
 import { promises as fs } from 'fs';
 import { promisify } from 'util';
 import rimrafModule from 'rimraf';
-import chromium from "@sparticuz/chromium";
+import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer-core';
+
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
@@ -17,9 +15,9 @@ const rimraf = promisify(rimrafModule);
 chromium.setHeadlessMode = true;
 chromium.setGraphicsMode = false;
 
-puppeteer.use(StealthPlugin());
-puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
-puppeteer.use(puppeteer_extra_plugin_anonymize_ua());
+puppeteerExtra.use(StealthPlugin());
+puppeteerExtra.use(AdblockerPlugin({ blockTrackers: true }));
+puppeteerExtra.use(puppeteer_extra_plugin_anonymize_ua());
 
 async function clearCache() {
     await rimraf('./.cache/puppeteer');
@@ -56,12 +54,13 @@ const WebscrapingData = (url1) => {
         await clearCache();
         console.log("I am inside Puppeteer");
         console.log(chromium.headless);
-        console.log(await chromium.executablePath());
 
         puppeteer.launch({
             defaultViewport: chromium.defaultViewport,
             headless: true,
+            executablePath: await chromium.executablePath,
             args: [
+                ...chromium.args,
                 `--user-agent=${getRandomUserAgent()}`,
                 '--disable-features=site-per-process',
                 '--v=1',
