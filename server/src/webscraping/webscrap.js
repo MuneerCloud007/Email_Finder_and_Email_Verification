@@ -49,25 +49,55 @@ const WebscrapingData = (url1) => {
         console.log("I am inside Puppeteer");
         let options = {};
         console.log(process.env.NODE_ENV)
-        console.log(puppeteer.executablePath());
 
 
 
 
 
-            options = {
-                args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
-                defaultViewport: chromium.defaultViewport,
-                executablePath:
+        options = {
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--single-process',
+                '--disable-gpu',
+                '--no-zygote',
+                '--disable-software-rasterizer',
+                '--disable-dev-shm-usage',
+                '--disable-extensions',
+                '--disable-background-networking',
+                '--disable-background-timer-throttling',
+                '--disable-client-side-phishing-detection',
+                '--disable-default-apps',
+                '--disable-hang-monitor',
+                '--disable-popup-blocking',
+                '--disable-prompt-on-repost',
+                '--disable-sync',
+                '--disable-translate',
+                '--metrics-recording-only',
+                '--mute-audio',
+                '--no-first-run',
+                '--safebrowsing-disable-auto-update',
+                '--enable-automation',
+                '--password-store=basic',
+                '--use-mock-keychain',
+                "--hide-scrollbars",
+                "--disable-web-security",
+                "--disable-setuid-sandbox",
+                "--no-sandbox",
+                "--single-process",
+                "--no-zygote",
+            ],
+            executablePath:
                 process.env.NODE_ENV === "production"
-                  ? puppeteer.executablePath()
-                  : puppeteer.executablePath(),
+                    ? process.env.PUPPETEER_EXECUTABLE_PATH 
+                    : puppeteer.executablePath(),
 
-                headless: true,
-                ignoreHTTPSErrors: true,
-            };
-        
-       
+            headless: true,
+            ignoreHTTPSErrors: true,
+        };
+
+
         console.log(options)
 
         puppeteer.launch(options).then(async browser => {
