@@ -15,7 +15,11 @@ chromium.setGraphicsMode = false;
 async function clearCache() {
     await rimraf('./.cache/puppeteer');
 }
-
+function delay(milliseconds) {
+    return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
+}
 const userAgentStrings = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.2227.0 Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
@@ -31,6 +35,20 @@ const getRandomUserAgent = () => {
     const randomIndex = Math.floor(Math.random() * userAgentStrings.length);
     return userAgentStrings[randomIndex];
 };
+let maxRetries=4;
+
+async function safeGoto(page, url, options, retries = 0) {
+    try {
+        await page.goto(url, options);
+    } catch (error) {
+        if (retries < maxRetries) {
+            console.log(`Retrying navigation to ${url} (${retries + 1}/${maxRetries})...`);
+            await safeGoto(page, url, options, retries + 1);
+        } else {
+            throw error;
+        }
+    }
+}
 
 const pageDelays = Array.from({ length: 30 }, (_, i) => 1000 + i * 100);
 const scrollTimes = Array.from({ length: 40 }, (_, i) => 100 * i);
@@ -59,8 +77,6 @@ const WebscrapingData = (url1) => {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--single-process',
-                '--disable-gpu',
                 '--no-zygote',
                 '--disable-software-rasterizer',
                 '--disable-dev-shm-usage',
@@ -89,14 +105,17 @@ const WebscrapingData = (url1) => {
                 "--no-zygote",
             ],
             executablePath:
-                process.env.NODE_ENV === "production"
-                    ? process.env.PUPPETEER_EXECUTABLE_PATH 
-                    : puppeteer.executablePath(),
+            process.env.NODE_ENV === "production"
+                ? process.env.PUPPETEER_EXECUTABLE_PATH 
+                : puppeteer.executablePath(),
+           
 
             headless: true,
+            dumpio: true,
+
             ignoreHTTPSErrors: true,
         };
-
+      
 
         console.log(options)
 
@@ -111,7 +130,7 @@ const WebscrapingData = (url1) => {
                 value: 'AQEFAQ8BAAAAAA_9W-EAAAGP8vkCmgAAAZAXBY8XVgAAsnVybjpsaTplbnRlcnByaXNlQXV0aFRva2VuOmVKeGpaQUFDbHFhTU15Q2EzWUJ0R29nV1ZQK3hrUkhFU09WY1hnaG1SSzV3ZFdGZ0JBQ2VrZ2VEXnVybjpsaTplbnRlcnByaXNlUHJvZmlsZToodXJuOmxpOmVudGVycHJpc2VBY2NvdW50Ojc1NjU1MzcyLDEyMDU4NzkyNiledXJuOmxpOm1lbWJlcjo4ODUyMTEzODVAEnM090WcGzcHVbH0PYjGOdpeaPYJKwGByL1txB_mYFDjIQgYGs7n7bcUB8ZQh5J_X2E5Kj3ObgRXCGYKMfTdoBEME8EdY8_JiJKewOv4IpQdJQuKaIwn9eWzkuLFFsoAibefSHN4cwqEFv3lyHn87NRMB9ZNyc0pUl00dB7P-oQNVlWOQBuZ2vel2E75b1jWAvaK',
                 domain: '.www.linkedin.com',
                 path: '/',
-                httpOnly: true,
+                httpOnly: false,
                 secure: true
             };
             await page.setCookie(cookie);
@@ -121,25 +140,14 @@ const WebscrapingData = (url1) => {
             });
 
             try {
-                async function safeGoto(url, options) {
-                    try {
-                        await page.goto(url, options);
-                    } catch (error) {
-                        console.error('Navigation error:', error);
-                    }
-                }
+               
 
-                // await safeGoto(navigate_urls[Math.floor(Math.random() * navigate_urls.length)], { waitUntil: 'load', timeout: 20000 });
-                // await new Promise(r => setTimeout(r, pageDelays[Math.floor(Math.random() * pageDelays.length)]));
+                await safeGoto(page,navigate_urls[Math.floor(Math.random() * navigate_urls.length)], { waitUntil: 'load', timeout: 20000 });
+                await new Promise(r => setTimeout(r, pageDelays[Math.floor(Math.random() * pageDelays.length)]));
+                
 
-                await safeGoto(url1, { waitUntil: 'load', timeout: 20000 });
-                await page.waitForSelector('a', { timeout: 1800000 });
-
-                const title = await page.evaluate(() => document.title);
-                console.log(title);
-
-                const links = await page.evaluate(() => Array.from(document.querySelectorAll('a')).map(a => a.href));
-                console.log(links);
+                await safeGoto(page,url1, {  waitUntil: 'networkidle2',  timeout: 20000000 });
+               
 
                 await page.waitForSelector('.account-top-card__account-actions', { timeout: 18000000 });
                 await new Promise(r => setTimeout(r, 4000));
@@ -156,6 +164,7 @@ const WebscrapingData = (url1) => {
                 reject({ error: error });
             } finally {
                 await new Promise(r => setTimeout(r, 1000));
+                console.log("I am in finally");
                 browser.close();
             }
 
@@ -163,6 +172,7 @@ const WebscrapingData = (url1) => {
         }).catch((err) => {
             console.log("I am error puputeer");
             console.log(err);
+            reject(err);
             console.log("After error puputeer");
         })
     });

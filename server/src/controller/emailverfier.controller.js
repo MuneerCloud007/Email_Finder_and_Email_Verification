@@ -25,6 +25,7 @@ const scrapeController = async (req, res, next) => {
 
         //Webscraping is completed
         const arr=await wrapperFunEmailVerfier(firstName,lastName,domain);
+        console.log(arr);
 
         //Now email Verification process has to be started....
         res.status(200).json({
