@@ -107,7 +107,7 @@ const WebscrapingData = (url1) => {
             ],
             executablePath:
             process.env.NODE_ENV === "production"
-                ? await chromium.executablePath:
+                ? process.env.PUPPETEER_EXECUTABLE_PATH:
                 await chromium.executablePath,
            
 
@@ -117,6 +117,8 @@ const WebscrapingData = (url1) => {
             ignoreHTTPSErrors: true,
         };
       
+
+        console.log(await chromium.executablePath);
 
         console.log(options)
 
