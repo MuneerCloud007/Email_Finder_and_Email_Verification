@@ -47,7 +47,7 @@ DbConnection().then(() => {
   process.exit(1); // Exit the process with failure
 });
 
-// Routes
+// Route
 app.use("/api/v1/user", userApi);
 app.use("/api/v1/emailVerifier", emailVerifier);
 
