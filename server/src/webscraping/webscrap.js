@@ -2,11 +2,12 @@
 import { promises as fs } from 'fs';
 import { promisify } from 'util';
 import rimrafModule from 'rimraf';
-import chromium from "@sparticuz/chromium";
+ import chromium from "@sparticuz/chromium";
 import puppeteer from 'puppeteer';
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+// import Chromium from 'chrome-aws-lambda';
 
 const rimraf = promisify(rimrafModule);
 chromium.setHeadlessMode = true;
@@ -106,8 +107,8 @@ const WebscrapingData = (url1) => {
             ],
             executablePath:
             process.env.NODE_ENV === "production"
-                ? process.env.PUPPETEER_EXECUTABLE_PATH 
-                : puppeteer.executablePath(),
+                ? await chromium.executablePath:
+                await chromium.executablePath,
            
 
             headless: true,
@@ -163,7 +164,6 @@ const WebscrapingData = (url1) => {
                 console.log(error);
                 reject({ error: error });
             } finally {
-                await new Promise(r => setTimeout(r, 1000));
                 console.log("I am in finally");
                 browser.close();
             }
