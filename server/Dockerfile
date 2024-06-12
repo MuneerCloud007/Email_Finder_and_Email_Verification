@@ -21,6 +21,10 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+    
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
 
 # Create app directory
 WORKDIR /usr/src/app
