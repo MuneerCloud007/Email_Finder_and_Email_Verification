@@ -1,30 +1,40 @@
 import mongoose from "mongoose";
+
 const emailSchema=new mongoose.Schema({
-    "First Name":{
+    "firstName":{
         type:"String",
         required:true
     },
-    "Last Name":{
+    "lastName":{
         type:String,
         required:true
     },
-    "Type":{
+    "company":{
+        type:String,  
+        required:true
+    },
+    "position":{
         type:String,
         required:true
     },
-    "Email address":{
+    "url":{
         type:String,
         required:true
     },
-    "User name":{
-        type:mongoose.Schema.ObjectId,
+    "user":{
+        type:mongoose.Schema.ObjectId
+        ,required:true
+    },
+    "user_position":{
+        type:String,
         required:true
     }
 
    
 },{timestamps:true})
+const emailVerificationModel=mongoose.model("emailData",emailSchema);;
 
-export default mongoose.model("emailData",emailSchema);
+export default emailVerificationModel;
 
 
 

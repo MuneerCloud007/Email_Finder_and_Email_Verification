@@ -5,8 +5,10 @@ import ApiError from '../utils/ApiError.js';
 
 
 const register = async (req, res, next) => {
-    const { username, email, password } = req.body;
+    console.log(req.body);
+    const { name:username, email, password } = req.body;
     try {
+        console.log(username)
         let user = await User.findOne({ username });
         if (user) {
             throw ApiError.badRequest('User already exists');
@@ -14,7 +16,7 @@ const register = async (req, res, next) => {
 
         user = new User({ username, email, password });
         await user.save();
-        res.status(201).json({ msg: 'User registered successfully' });
+        res.status(200).json({ msg: 'User registered successfully' });
     } catch (err) {
         next(err);
     }
@@ -23,6 +25,7 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
     const { username, password } = req.body;
     try {
+        console.log(username+"=+="+password);
         const user = await User.findOne({ username });
         if (!user) {
             throw ApiError.unauthorized('Invalid credentials');
@@ -39,7 +42,8 @@ const login = async (req, res, next) => {
 
         res.cookie('token', token, { httpOnly: true, secure: false }); // Set 'secure: true' if using HTTPS
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false });
-        res.json({ message:"user login successfully",token, refreshToken });
+        console.log(user);
+        res.json({ message:"user login successfully",token, refreshToken,userId:user["_id"] });
     } catch (err) {
         next(err);
     }
