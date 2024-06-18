@@ -25,7 +25,6 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
     const { username, password } = req.body;
     try {
-        console.log(username+"=+="+password);
         const user = await User.findOne({ username });
         if (!user) {
             throw ApiError.unauthorized('Invalid credentials');
