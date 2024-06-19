@@ -9,7 +9,7 @@
     "stripe": {
       "publishableAPIKey": "pk_test_51Oy5pESCce5s2eFrmG4Hm2hrZJjdBLelvX5fdwLcTWOjdLtTE64SBJh054k87zP6fHGGWJV4Wsb5End3DxkIKuhO00T0PgXVHN"
     },
-    "server_url": "https://email-finder-and-email-verification-a55p.vercel.app"
+    "server_url": "https://email-finder-and-email-verification.vercel.app/"
   }
 }
 
