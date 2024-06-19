@@ -21,11 +21,11 @@ const app = express();
 
 // CORS options
 const corsOptions = {
-  origin: ["https://email-finder-and-email-verification-1vbn.vercel.app/"], // Allow requests from any origin
+  origin: "https://email-finder-and-email-verification-1vbn.vercel.app", // Allow requests from specific origin
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Specify allowed HTTP methods
-  allowedHeaders: 'Content-Type, Authorization', // Specify other allowed headers as needed
-  exposedHeaders: 'Access-Control-Allow-Origin'
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // Specify allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify other allowed headers as needed
+  optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
 // Enable CORS with specified options
