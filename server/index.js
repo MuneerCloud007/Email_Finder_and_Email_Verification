@@ -8,15 +8,20 @@ import emailVerifier from './src/api/emailVerfier.api.js';
 import DbConnection from './src/utils/dbconnection.js';
 import userApi from './src/api/user.api.js';
 import ApiError from './src/utils/ApiError.js';
+import { fileURLToPath } from 'url';
+
 
 // Load environment variables from the .env file
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
 // CORS options
 const corsOptions = {
-  origin: "*", // Allow requests from any origin
+  origin: ["https://email-finder-and-email-verification-1vbn.vercel.app/"], // Allow requests from any origin
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Specify allowed HTTP methods
   allowedHeaders: 'Content-Type, Authorization', // Specify other allowed headers as needed
@@ -61,13 +66,13 @@ app.all('*', (req, res, next) => {
 app.use(errorHandler);
 
 // Serve static files in production
-// if (process.env.NODE_ENV === "production") {
-//   console.log("Production mode enabled");
-//   app.use(express.static(path.join(__dirname, "../client/dist")));
-//   app.get("/", (req, res) =>
-//     res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"))
-//   );
-// }
+if (process.env.NODE_ENV === "production") {
+  console.log("Production mode enabled");
+  app.use(express.static(path.join(__dirname, "../client/dist")));
+  app.get("/", (req, res) =>
+    res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"))
+  );
+}
 
 // Centralized error handling
 app.use((err, req, res, next) => {
