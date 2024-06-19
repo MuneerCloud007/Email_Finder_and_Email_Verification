@@ -1,5 +1,6 @@
 function sendMessageToExtension(data) {
-    const extensionId = 'hbmoppnmkbafmlohdpnolbebbcooohbk';
+    const extensionId = 'nnecfaagbcabiampokcjpnpcjfnmiacg';
+    
     console.log(data);
     const message = { action: 'setData',data:data };
   
