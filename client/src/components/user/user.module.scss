@@ -1,0 +1,58 @@
+.user {
+
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: $scale2;
+  z-index: 10;
+
+}
+
+.name {
+
+  opacity: 0.5;
+  text-align: right;
+  font-size: $scale-2;
+  font-weight: 400;
+
+  @media (max-width: $mobile){
+
+    display: none;
+
+  }
+}
+
+.avatar {
+
+  margin-left: $scale-2;
+  height: $scale2;
+  width: $scale2;
+  border-radius: 100%;
+
+  @media (min-width: $mobile){
+
+    height: $scale3;
+    width: $scale3;
+
+  }
+}
+
+.hoverNav {
+
+  margin-top: -0.4em;
+
+}
+
+.language {
+
+  margin-right: 0;
+
+  @media (min-width: $mobile){
+    
+    margin-right: $scale-2;
+
+  }  
+}

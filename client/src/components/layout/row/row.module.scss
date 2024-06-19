@@ -1,0 +1,34 @@
+.row {
+
+  padding: $scale4 0;
+  background-color: white;
+  text-align: left;
+
+  footer {
+
+    margin-top: $scale;
+
+  }
+
+  @media (min-width: $mobile){
+
+    padding: $scale6 0;
+
+  }
+}
+
+.dark {
+
+  color: white;
+  background-color: $c-slate-800 !important;
+
+}
+
+:global(.dark){
+
+  .row {
+
+    background-color: $c-slate-900;
+
+  }
+}

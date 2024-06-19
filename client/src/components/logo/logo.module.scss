@@ -1,0 +1,15 @@
+.base {
+
+  display: block;
+  width: $scale8;
+  height: $scale2;
+  margin: 0 auto $scale2;
+  outline: none;
+
+  @media (min-width: $mobile){
+
+    width: $scale9;
+    height: $scale4;
+
+  }
+}

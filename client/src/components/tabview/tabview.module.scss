@@ -1,0 +1,93 @@
+.tabs {
+
+  overflow: hidden;
+  border-bottom: 1px solid $c-border;
+
+  @media (min-width: $mobile){
+
+    border-bottom: none;
+
+  }
+}
+
+.button {
+
+  position: relative;
+  float: left;
+  width: 100%;
+  padding: $scale $scale5;
+  outline: none;
+  font-size: 0.85em;
+  transition: all 0.2s ease-in-out;
+  border-bottom: 1px solid $c-border;
+
+  &:last-child {
+
+    border-bottom: none;
+
+  }
+
+  @media (min-width: $mobile){
+
+    width: auto;
+    border-bottom: none;
+
+  }
+}
+
+.button_inactive {
+
+  color: $c-text;
+  background-color: white;
+
+  @media (min-width: $mobile){
+
+    color: white;
+    background-color: lighten($c-blue, 5%);
+
+  }
+}
+
+.button_active {
+
+  color: white;
+  background-color: $c-blue;
+
+  @media (min-width: $mobile){
+
+    color: $c-text;
+    background-color: white;
+
+  }
+}
+
+:global(.dark){
+
+  @media (max-width: $mobile){
+    .tabs {
+
+      border-bottom: 1px solid $c-slate-700;
+
+    }
+  }
+  
+  .button {
+
+    color: white;
+    border: none;
+
+  }
+
+  .button_active {
+
+    color: $c-slate-200;
+    background-color: $c-slate-800;
+
+  }
+
+  .button_inactive {
+
+    background-color: $c-blue;
+
+  }
+}

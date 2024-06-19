@@ -1,0 +1,101 @@
+{
+  "welcome": "Bienvenido",
+  "search": "Buscar",
+  "error": "Hubo un error en la matrix. Por favor, inténtalo de nuevo.",
+  "feedback": {
+    "title": "¿Disfrutas Gravity?",
+    "form": {
+      "comment": {
+        "label": "Cuéntanos sobre tu experiencia"
+      },
+      "button": "Enviar Retroalimentación",
+      "success_message": "Gracias, apreciamos mucho tus comentarios."
+    }
+  },
+  "form": {
+    "date": {
+      "error": "Por favor, selecciona una fecha"
+    },
+    "card": {
+      "error": "Por favor, proporciona detalles válidos de tarjeta de crédito"
+    },
+    "email": {
+      "error": "Por favor, introduce una dirección de correo electrónico válida"
+    },
+    "fieldset": {
+      "error": {
+        "unselected": "Por favor, selecciona una opción",
+        "min": "Por favor, selecciona un mínimo de",
+        "max": "Por favor, selecciona un máximo de",
+        "min_max": "Por favor, elige entre {{min}} y {{max}} opciones."
+      }
+    },
+    "file": {
+      "dropzone": "Suelta el archivo aquí",
+      "error": {
+        "unselected": "Por favor, selecciona un archivo",
+        "max": "Por favor, sube un máximo de",
+        "excluded": "archivos no aceptados"
+      }
+    },
+    "number": {
+      "error": {
+        "unentered": "Por favor, introduce un número",
+        "invalid": "Por favor, introduce un número válido",
+        "min": "Por favor, introduce un número igual o superior a",
+        "max": "Por favor, introduce un número igual o inferior a",
+        "min_max": "Por favor, introduce un número entre {{min}} y {{max}}"
+      }
+    },
+    "password": {
+      "error": {
+        "unentered": "Por favor, introduce una contraseña",
+        "min": "La contraseña debe tener un mínimo de 8 caracteres",
+        "uppercase": "La contraseña debe tener al menos una letra mayúscula",
+        "lowercase": "La contraseña debe tener al menos una letra minúscula"
+      }
+    },
+    "phone": {
+      "error": "Por favor, introduce un número de teléfono válido"
+    },
+    "select": {
+      "error": "Por favor, selecciona una opción"
+    },
+    "text": {
+      "error": "Por favor, introduce un valor"
+    },
+    "url": {
+      "error": "Por favor, introduce una URL válida"
+    }
+  },
+  "locale": {
+    "title": "Cambiar Idioma",
+    "form": {
+      "language": {
+        "label": "Idioma"
+      }
+    }
+  },
+  "paginate": {
+    "showing": "mostrando {{start}} - {{end}} de {{total}}",
+    "no_results": "Sin Resultados"
+  },
+  "social": {
+    "use": "Usar",
+    "or": "o"
+  },
+  "table": {
+    "header": {
+      "select": "seleccionar",
+      "actions": "acciones"
+    },
+    "action": {
+      "select_all": "",
+      "bulk_delete": "Eliminar Seleccionados"
+    },
+    "label": {
+      "yes": "Sí",
+      "no": "No"
+    }
+  }
+}

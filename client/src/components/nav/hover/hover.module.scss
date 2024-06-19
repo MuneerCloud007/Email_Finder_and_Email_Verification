@@ -1,0 +1,80 @@
+.wrapper {
+  position: relative;
+  cursor: pointer;
+  font-size: 0.875rem; /* text-slate-500 corresponds to a font size */
+  z-index: 100;
+}
+
+.nav {
+  position: absolute;
+  border: 1px solid #96a2ad!important;
+  top: 100%;
+  padding: 0.5rem; /* px-2 corresponds to 0.5rem */
+  text-align: left;
+  border-radius: 0.375rem; /* rounded corresponds to a border radius */
+  min-width: 11rem; /* min-w-44 corresponds to min width */
+  right: 0;
+  background-color: white !important; /* bg-slate-200 corresponds to a background color */
+}
+
+.button {
+  display: block;
+  font-size: 0.875rem; /* text-sm corresponds to a font size */
+  width: 100%;
+  
+  border-bottom: 1px solid #cbd5e0; /* border-b corresponds to a border */
+  border-style: dotted; /* border-solid corresponds to a border style */
+  border-color: #edf2f7; /* border-slate-200 corresponds to a border color */
+  border-radius: 0; /* rounded-none corresponds to a border radius */
+  font-weight: 100; /* font-thin corresponds to font weight */
+  padding-left: 0.5rem; /* px-2 corresponds to 0.5rem */
+  padding-right: 0.5rem; /* px-2 corresponds to 0.5rem */
+  padding-top: 1rem; /* py-4 corresponds to 1rem */
+  padding-bottom: 1rem; /* py-4 corresponds to 1rem */
+  text-align: right;
+  background-color: white !important;
+  color: #4a5568 !important; /* text-slate-800 corresponds to a text color */
+  opacity: 0.7;
+}
+
+.button:last-child {
+  border-bottom: none; /* last:border-none removes border from last child */
+}
+
+.button:hover {
+  opacity: 1; /* hover:opacity-100 sets opacity to 1 on hover */
+  color:black !important;
+  background-color: rgb(248, 248, 248) !important;
+}
+
+
+
+
+.label {
+  display: inline-block;
+  font-size: 0.875rem; /* text-sm corresponds to a font size */
+  font-weight: 600; /* font-semibold corresponds to font weight */
+  color: #718096; /* text-slate-400 corresponds to a text color */
+}
+
+.icon {
+  position: relative;
+  display: inline-block;
+  margin-left: 2px; /* ml-[2px] corresponds to a margin left */
+  top: 1px; /* top-[1px] corresponds to a top position */
+}
+
+.left {
+  left: 0;
+  text-align: left;
+}
+
+.right {
+  right: 0;
+  text-align: right;
+}
+
+.right .button,
+.right a {
+  text-align: right;
+}

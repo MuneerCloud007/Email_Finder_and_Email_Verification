@@ -1,0 +1,14 @@
+{
+  "title": "Iniciar Sesión",
+  "message": {
+    "success": {
+      "title": "Usando la Magia",
+      "text": "Por favor espera, iniciando sesión ahora..."
+    },
+    "error": {
+      "title": "El Enlace Mágico No Es Válido",
+      "text": "Por favor regresa e intenta de nuevo",
+      "button": "Volver a Iniciar Sesión"
+    }
+  }
+}

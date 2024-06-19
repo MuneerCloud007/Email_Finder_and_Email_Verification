@@ -1,0 +1,21 @@
+
+
+/* table{
+    table-layout: fixed;
+} */
+
+
+.table-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.table-wrapper {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+
+*{
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;
+}
