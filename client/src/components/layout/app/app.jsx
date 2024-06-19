@@ -97,7 +97,8 @@ function ProtectedNavBar({setUpdateLogout}){
   };
 
   const handleLogout = () => {
-    sendMessageTOLogoutExtension();
+    const val=sendMessageTOLogoutExtension();
+  console.log(vl);
 
     localStorage.clear();
     window.location = '/';

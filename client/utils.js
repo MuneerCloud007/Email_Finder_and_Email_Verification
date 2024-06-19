@@ -14,7 +14,7 @@ function sendMessageToExtension(data) {
   }
 
   function sendMessageTOLogoutExtension(){
-    const extensionId = 'hbmoppnmkbafmlohdpnolbebbcooohbk';
+    const extensionId = 'nnecfaagbcabiampokcjpnpcjfnmiacg';
     const message = { action: 'logout'};
 
     chrome.runtime.sendMessage(extensionId, message, (response) => {
