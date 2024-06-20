@@ -7,6 +7,7 @@ import SetupAuditTrailTable from "views/setupAuditTrail/SetupAuditTrail";
 import TrailDB from "../views/setupAuditTrail/TrailDB";
 import PrimeTable from 'views/setupAuditTrail/PrimeTable';
 import LinkedlnScrap from 'views/LinkedScrap/LinkedlnScrap';
+import LinkedlnScrapById from "views/LinkedScrap/LinkedlnScrapById";
 
 const Routes = [
   {
@@ -68,7 +69,15 @@ const Routes = [
     layout:"app",
     permission:"user",
     title:"LinkedInScrap"
-  }
+  },
+    {
+      path:"/linkedScrap/dashboard/:id",
+      view:LinkedlnScrapById,
+      layout:"app",
+      permission:"user",
+      title:"LinkedInScrap"
+    }
+  
 ]
 
 export default Routes;

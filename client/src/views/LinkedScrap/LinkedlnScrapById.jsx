@@ -12,6 +12,7 @@ import Style from "../../components/paginate/paginate.tailwind";
 import upward from "../../../public/assets/icons/arrow-up.svg"
 import downward from "../../../public/assets/icons/arrow-down.svg"
 import { PaginationCustom } from "../setupAuditTrail/Pagination";
+import {useParams} from "react-router-dom";
 
 
 
@@ -374,8 +375,9 @@ const data = [
 
 const TrailDB = () => {
     const user=JSON.parse(localStorage.getItem("user"))
-    let { loading, data } =  useAPI("/api/v1/emailVerifier/getAll","post",{ "url":"https://www.linkedin.com/sales/company/89796011?_ntb=sVXClZ1fddsfsdfQIi2pIN2R7%2Fgzw%3D%3D"
-        ,"firstName":"muneer","lastName":"ahamed","company":"cloud","position":"assost","user":user.userId,"user_position":"3"} );
+let { id } = useParams();
+
+    let { loading, data } =  useAPI(`api/v1/emailVerifier/getById/${id}`,"post");
     const { clear, setClear } = usePage();
     const [getDataSecond, setGetDataSecond] = useState(false);
 
@@ -395,11 +397,9 @@ const TrailDB = () => {
             return <Loader />
         }
         if (data ) {
-            const arrKey=Object.keys(data);
-            let newArray=[]
-            arrKey.map((key)=>{
-                newArray=[...newArray,...data[key]]
-            })
+            console.log(data);
+            const key=Object.keys(data);
+           let newArray=[{...data[key]}];
             console.log(newArray);
        
 
