@@ -12,9 +12,10 @@ const errorHandler = (err, req, res, next) => {
 
     // Default to 500 server error if the error is not an instance of ApiError
     console.log(err);
+    const message=err.message || "Internal Server Error"
     return res.status(500).json({
         status: 'error',
-        message: 'Internal Server Error',
+        message: message,
     });
 };
 
