@@ -1,5 +1,5 @@
 function sendMessageToExtension(data) {
-    const extensionId = 'nnecfaagbcabiampokcjpnpcjfnmiacg';
+    const extensionId = 'flddanldfhnnnehmoofobllfmdcinjlj';
     
     console.log(data);
     const message = { action: 'setData',data:data };
@@ -14,7 +14,7 @@ function sendMessageToExtension(data) {
   }
 
   function sendMessageTOLogoutExtension(){
-    const extensionId = 'nnecfaagbcabiampokcjpnpcjfnmiacg';
+    const extensionId = 'flddanldfhnnnehmoofobllfmdcinjlj';
     const message = { action: 'logout'};
 
     chrome.runtime.sendMessage(extensionId, message, (response) => {
