@@ -1,5 +1,5 @@
 import express from "express";
-import { register, refresh,login,logout} from "../controller/user.controller.js";
+import { register, refresh,login,logout,getUserData,updatePassword} from "../controller/user.controller.js";
 
 const api = express.Router();
 
@@ -14,6 +14,10 @@ api.post('/refresh', refresh);
 
 // Logout route
  api.post('/logout', logout);
+//get User Data
+ api.get("/getUserData/:id",getUserData);
+//Update password
+ api.put("/updatePassword/:id",updatePassword);
 
 export default api;
 

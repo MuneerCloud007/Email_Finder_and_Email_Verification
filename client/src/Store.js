@@ -1,10 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import SetupAuditTrailReducer from "feature/SetupAuditTrail/slice/SetupAuditTrail";
+import AuthReducer from "./features/slice/userSlice";
+import EmailVerifierReducer from "./features/slice/emailVerifier";
+import emailVerifier from "./features/slice/emailVerifier";
 
 
 const Store=configureStore({
     reducer:{
-       setupAuditTrail :SetupAuditTrailReducer
+       auth :AuthReducer,
+       emailVerifier:EmailVerifierReducer
         
     }
 })

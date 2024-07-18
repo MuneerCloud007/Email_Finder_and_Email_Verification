@@ -1,38 +1,33 @@
 import mongoose from "mongoose";
 
-const emailSchema=new mongoose.Schema({
-    "firstName":{
-        type:"String",
-        required:true
-    },
-    "lastName":{
-        type:String,
-        required:true
-    },
-    "company":{
-        type:String,  
-        required:true
-    },
-    "position":{
-        type:String,
-        required:true
-    },
-    "url":{
-        type:String,
-        required:true
-    },
-    "user":{
-        type:mongoose.Schema.ObjectId
-        ,required:true
-    },
-    "user_position":{
-        type:String,
-        required:true
-    }
+const emailSchema = new mongoose.Schema({
 
-   
-},{timestamps:true})
-const emailVerificationModel=mongoose.model("emailData",emailSchema);;
+    "companyInfo": [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "CompanyInfo",
+        required: true //I have wrote additionField inside the companyInfo,
+    
+
+    }],
+
+
+    "user": {
+        type: mongoose.Schema.Types.ObjectId,
+
+        ref: "User",
+        required: true
+    },
+
+
+    "folder": {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "FolderData",
+        required: true
+    },
+  
+
+}, { timestamps: true })
+const emailVerificationModel = mongoose.model("emailData", emailSchema);;
 
 export default emailVerificationModel;
 

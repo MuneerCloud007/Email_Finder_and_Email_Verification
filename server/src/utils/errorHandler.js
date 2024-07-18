@@ -1,6 +1,10 @@
 import ApiError from './ApiError.js';
 
 const errorHandler = (err, req, res, next) => {
+    if (res.headersSent) {
+        // If headers are already sent, delegate to the default Express error handler
+        return next(err);
+    }
     if (err instanceof ApiError) {
         console.log(err.message); 
         return res.status(err.statusCode).json({

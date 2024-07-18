@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { application } from 'express';
 import cors from 'cors';
 import path from 'path';
 import cookieParser from 'cookie-parser';
@@ -7,74 +7,101 @@ import { errorHandler } from './src/utils/errorHandler.js';
 import emailVerifier from './src/api/emailVerfier.api.js';
 import DbConnection from './src/utils/dbconnection.js';
 import userApi from './src/api/user.api.js';
-import ApiError from './src/utils/ApiError.js';
+import folderApi from './src/api/folderData.api.js';
+import socketIoMiddleware from './src/utils/SocketMiddleware.js'; // Import the middleware
+import { Server } from "socket.io";
+import { createServer } from "http";
 import { fileURLToPath } from 'url';
+import fileUploadApi from "./src/api/fileUpload.api.js";
+import creditApi from './src/api/credit.api.js';
 
-
-// Load environment variables from the .env file
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = createServer(app);
 
-// CORS options
 const corsOptions = {
-  origin: "*", // Allow requests from specific origin
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // Specify allowed HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify other allowed headers as needed
-  optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+  origin: "*",
+  credentials: true,
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 };
 
-// Enable CORS with specified options
 app.use(cors(corsOptions));
-
-// Middleware for parsing JSON and urlencoded data and cookie handling
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Basic test route
 app.get('/test', (req, res) => {
   res.send('Server is running!');
 });
 
-// Connect to the database
 DbConnection().then(() => {
   const PORT = process.env.PORT || 4000;
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
   });
 }).catch((err) => {
   console.error("There is an issue with the MongoDB connection: ", err);
-  process.exit(1); // Exit the process with failure
+  process.exit(1);
 });
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["my-custom-header"],
+    credentials: true
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  socket.on('disconnect', (reason) => {
+    console.log('Client disconnected:', reason);
+  });
+
+  socket.on('messageFromClient', ({ data, name, socketId }) => {
+    console.log(name);
+    console.log(data);
+    console.log(socketId);
+    io.emit("btnLoading", {message:"THE BTN LOADING !!!"});
+  });
+});
+
+// Use the middleware to attach `io` to the `req` object
+app.use(socketIoMiddleware(io));
 
 // Route
-app.use("/api/v1/user", userApi);
-app.use("/api/v1/emailVerifier", emailVerifier);
+app.use("/api/v1/user", userApi);  
+app.use("/api/v1/emailVerifier", emailVerifier); 
+app.use("/api/v1/folder", folderApi);   
+app.use("/api/v1/file",fileUploadApi); 
+app.use("/api/v1/credit",creditApi);
+// Route to emit message
+app.get('/emit-message', (req, res) => {
+  const message = "Hello from /emit-message route!";
 
-// Wildcard route for undefined routes
-app.all('*', (req, res, next) => {
-  console.log("I am inside wildcard");
-  next(ApiError.notFound('Route not found'));
+  // Emit a message to all connected clients
+  req.io.emit('btnLoading', message);
+
+  res.send('Message emitted to all clients.');
 });
 
-// Error handling middleware
 app.use(errorHandler);
 
-// Serve static files in production
 if (process.env.NODE_ENV === "production") {
-  console.log("Production mode enabled");
   app.use(express.static(path.join(__dirname, "../client/dist")));
   app.get("/", (req, res) =>
     res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"))
   );
 }
 
-// Centralized error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');

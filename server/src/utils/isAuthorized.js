@@ -4,7 +4,7 @@ import ApiError from './ApiError.js';
 
 const checkAuthorization = async (req, res, next) => {
     let token = req.header('Authorization') || req.cookies.token;
-    token=token.split(" ")[1];
+    token=token?.split(" ")[1];
 
     if (!token) {
         return next(ApiError.unauthorized('No token, authorization denied'));
