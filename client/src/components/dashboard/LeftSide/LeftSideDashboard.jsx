@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import { BarChart, Wallet, Newspaper, BellRing, Paperclip, Brush, Wrench, Code, Bug, Presentation, Atom, PieChart, Plus } from 'lucide-react'
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllFolderSlice, NewFolderSlice, updateFolderSlice, deleteFolderSlice } from "../../../features/slice/emailVerifier";
-import { NavLink } from 'react-router-dom';
+import { Plus, Atom, Brush, Wrench } from 'lucide-react';
 import {
     Button,
     Dialog,
@@ -15,11 +14,12 @@ import {
     MenuList,
     MenuItem,
 } from "@material-tailwind/react";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import "./Left.css";
 
-
-
 export default function SidebarOne({ RightSideState, setRightSideState }) {
+
     const [visible, setVisible] = useState(false);
     const { loading, data, error } = useSelector((state) => state.emailVerifier.FolderData);
     const dispatch = useDispatch();
@@ -28,7 +28,7 @@ export default function SidebarOne({ RightSideState, setRightSideState }) {
     const handleOpen = () => setOpen(!open);
     const [editFolder, setEditFolder] = useState(false);
     const editHandleOpen = () => setEditFolder(!editFolder);
-console.log("Right side state ---->");
+    console.log("Right side state ---->");
     console.log(RightSideState);
 
 
@@ -40,13 +40,32 @@ console.log("Right side state ---->");
 
     }, [])
 
-    console.log(loading);
     if (loading) {
-        return <h1>Loading</h1>
+        return (
+            <aside className="flex h-screen w-64 flex-col border-r bg-white px-5 py-8">
+                <Skeleton width={40} height={46} />
+                <div className="mt-6 flex flex-1 flex-col justify-between">
+                    <nav className="-mx-3 space-y-6">
+                        <div className="space-y-3">
+                            <Skeleton height={20} width="80%" />
+                            <Skeleton count={4} height={40} />
+                        </div>
+                        <div className="space-y-3">
+                            <Skeleton height={20} width="80%" />
+                            <Skeleton count={4} height={40} />
+                        </div>
+                        <div className="space-y-3">
+                            <Skeleton height={20} width="80%" />
+                            <Skeleton count={4} height={40} />
+                        </div>
+                    </nav>
+                </div>
+            </aside>
+        );
     }
     if (data) {
         return (
-            <aside className="flex h-screen w-64 flex-col  border-r bg-white px-5 py-8">
+            <aside className="flex h-screen w-64 flex-col border-r bg-white px-5 py-8">
                 <a href="#">
                     <svg
                         width="40"
@@ -62,206 +81,131 @@ console.log("Right side state ---->");
                     </svg>
                 </a>
                 <div className="mt-6 flex flex-1 flex-col justify-between">
-                    <nav className="-mx-3 space-y-6 ">
-                        <div className="space-y-3 ">
+                    <nav className="-mx-3 space-y-6">
+                        <div className="space-y-3">
                             <label className="px-3 text-xs font-semibold uppercase text-gray-900">
                                 Folder Structure
                             </label>
                             <a
                                 className="flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700"
                                 href="#"
-                                onClick={() => { handleOpen() }}
+                                onClick={handleOpen}
                             >
                                 <label
                                     className=" btn rounded-md border bg-slate-50 border-green-600 px-3 py-2 text-sm font-semibold text-green-600 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 flex hover:bg-green-600 hover:text-white bg-white"
                                 >
                                     <Plus className="h-5 w-5" aria-hidden="true" />
-
                                     New Folder
-
                                 </label>
-
-
-
-
-
                             </a>
-
-
-                            <ResponsiveDemo
-                                open={open}
-                                handleOpen={handleOpen}
-                            />
-
+                            <ResponsiveDemo open={open} handleOpen={handleOpen} />
                         </div>
-                        <div className="space-y-3 ">
+                        <div className="space-y-3">
                             <label className="px-3 text-xs font-semibold uppercase text-gray-900">
                                 Your Folders
                             </label>
-
-                            {
-                                data && data.map((vl) => {
-                                    const { FolderName, _id, checked } = vl;
-
-
-
-                                    return (
-                                        <div className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700
+                            {data && data.map((vl) => {
+                                const { FolderName, _id, checked } = vl;
+                                return (
+                                    <div
+                                        key={_id}
+                                        className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700
                                           menu-bar
-                                          ${checked && RightSideState == 1 ? "bg-blue-600 text-white" : ""}
+                                          ${checked && RightSideState === 1 ? "bg-blue-600 text-white" : ""}
                                         `}
-
-                                        >
-                                            <Menu placement="right-end"
-
-
-
+                                    >
+                                        <Menu placement="right-end">
+                                            <Atom className="h-5 w-5" aria-hidden="true" />
+                                            <span
+                                                className="mx-2 text-sm font-medium cursor-pointer"
+                                                onClick={() => {
+                                                    if (RightSideState !== 1) setRightSideState(1);
+                                                    const Folder = JSON.parse(localStorage.getItem("Folder"));
+                                                    if (_id !== Folder["_id"]) {
+                                                        dispatch(updateFolderSlice({
+                                                            url: "/api/v1/folder/updateById",
+                                                            method: "put",
+                                                            data: {
+                                                                newFolder: _id,
+                                                                currentFolder: Folder["_id"]
+                                                            }
+                                                        }));
+                                                    }
+                                                }}
                                             >
-
-
-                                                <Atom className="h-5 w-5" aria-hidden="true" />
-
-                                                <span className="mx-2 text-sm font-medium"
-
-                                                    onClick={(e) => {
-
-
-                                                        RightSideState != 1 && setRightSideState(1);
-
-                                                        console.log(e.target)
-                                                        const Folder = JSON.parse(localStorage.getItem("Folder"))
-
-                                                        console.log(_id == Folder["_id"]);
-                                                        console.log(Folder);
-                                                        if (_id != Folder["_id"]) {
-                                                            console.log("CHECKED")
-                                                            console.log(checked);
-                                                           
-                                                            dispatch(updateFolderSlice({
-                                                                url: "/api/v1/folder/updateById", method: "put", data: {
-                                                                    newFolder: _id,
-                                                                    currentFolder: Folder["_id"]
-                                                                }
-                                                            }))
-                                                        
-
-                                                        }
-
-
-                                                    }}
-                                                >{FolderName}</span>
-                                                <div className="dots dropdown dropdown-right  ml-auto ">
-                                                    <MenuHandler tabIndex={0} >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20"><path fill="currentColor" d="M10.001 7.8a2.2 2.2 0 1 0 0 4.402A2.2 2.2 0 0 0 10 7.8zm0-2.6A2.2 2.2 0 1 0 9.999.8a2.2 2.2 0 0 0 .002 4.4m0 9.6a2.2 2.2 0 1 0 0 4.402a2.2 2.2 0 0 0 0-4.402" /></svg>
-                                                    </MenuHandler >
-
-                                                </div>
-
+                                                {FolderName}
+                                            </span>
+                                            <div className="dots dropdown dropdown-right ml-auto">
+                                                <MenuHandler tabIndex={0}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20">
+                                                        <path fill="currentColor" d="M10.001 7.8a2.2 2.2 0 1 0 0 4.402A2.2 2.2 0 0 0 10 7.8zm0-2.6A2.2 2.2 0 1 0 9.999.8a2.2 2.2 0 0 0 .002 4.4m0 9.6a2.2 2.2 0 1 0 0 4.402a2.2 2.2 0 0 0 0-4.402" />
+                                                    </svg>
+                                                </MenuHandler>
                                                 <MenuList>
                                                     <MenuItem onClick={editHandleOpen}>Edit</MenuItem>
                                                     <MenuItem
                                                         onClick={() => {
-                                                            console.log("DELETE BTN");
-                                                            if(checked){
+                                                            if (checked) {
                                                                 alert("Current Folder is active !!!");
-
+                                                            } else {
+                                                                dispatch(deleteFolderSlice({
+                                                                    url: `/api/v1/folder/delete/${_id}`,
+                                                                    method: "delete",
+                                                                }));
                                                             }
-                                                            else{
-                                                            dispatch(deleteFolderSlice({
-                                                                url: `/api/v1/folder/delete/${_id}`, method: "delete",
-                                                            }))
-                                                        }
                                                         }}
                                                     >
-
-                                                        Delete</MenuItem>
+                                                        Delete
+                                                    </MenuItem>
                                                 </MenuList>
-                                            </Menu>
-
-                                        </div>
-
-
-                                    )
-                                })
-                            }
-
-
-
+                                            </div>
+                                        </Menu>
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <EditBtn
-                            data={"something"}
-                            editHandleOpen={editHandleOpen}
-                            editOpen={editFolder}
-                        />
-
-                        <div className="space-y-3 ">
+                        <EditBtn editHandleOpen={editHandleOpen} editOpen={editFolder} data={"something"} />
+                        <div className="space-y-3">
                             <label className="px-3 text-xs font-semibold uppercase text-gray-900">
                                 Bulk Xls
                             </label>
                             <a
-                   className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${ RightSideState==2 ? "bg-blue-600 text-white" : ""}
-                   `}                                href="#"
-                                onClick={() => {
-                                    setRightSideState(2)
-
-                                }}
+                                className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${RightSideState === 2 ? "bg-blue-600 text-white" : ""}`}
+                                href="#"
+                                onClick={() => setRightSideState(2)}
                             >
                                 <Brush className="h-5 w-5" aria-hidden="true" />
                                 <span className="mx-2 text-sm font-medium">Email Finder</span>
                             </a>
-
                             <a
-                                className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700  ${ RightSideState==3 ? "bg-blue-600 text-white" : ""}
-`}
-                            onClick={()=>{
-                                setRightSideState(3);
-                            }}
+                                className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${RightSideState === 3 ? "bg-blue-600 text-white" : ""}`}
+                                onClick={() => setRightSideState(3)}
                             >
                                 <Brush className="h-5 w-5" aria-hidden="true" />
                                 <span className="mx-2 text-sm font-medium">Email Verifier</span>
                             </a>
-
-
-
-
                             <a
-                                          className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700  ${ RightSideState==4 ? "bg-blue-600 text-white" : ""}
-                                          `}
-                                                                      onClick={()=>{
-                                                                          setRightSideState(4);
-                                                                      }}
+                                className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${RightSideState === 4 ? "bg-blue-600 text-white" : ""}`}
+                                onClick={() => setRightSideState(4)}
                             >
                                 <Wrench className="h-5 w-5" aria-hidden="true" />
                                 <span className="mx-2 text-sm font-medium">Domain Finder</span>
                             </a>
                         </div>
-
-                        <div className="space-y-3 ">
+                        <div className="space-y-3">
                             <label className="px-3 text-xs font-semibold uppercase text-gray-900">
                                 Customization
                             </label>
-
-
                             <a
-                                 className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700  ${ RightSideState==5 ? "bg-blue-600 text-white" : ""}
-                                 `}
-                                                             onClick={()=>{
-                                                                 setRightSideState(5);
-                                                             }}
+                                className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${RightSideState === 5 ? "bg-blue-600 text-white" : ""}`}
+                                onClick={() => setRightSideState(5)}
                             >
                                 <Brush className="h-5 w-5" aria-hidden="true" />
                                 <span className="mx-2 text-sm font-medium">Themes</span>
                             </a>
-
-
-
-
                             <a
-                                 className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700  ${ RightSideState==6 ? "bg-blue-600 text-white" : ""}
-                                 `}
-                                                             onClick={()=>{
-                                                                 setRightSideState(6);
-                                                             }}
+                                className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${RightSideState === 6 ? "bg-blue-600 text-white" : ""}`}
+                                onClick={() => setRightSideState(6)}
                             >
                                 <Wrench className="h-5 w-5" aria-hidden="true" />
                                 <span className="mx-2 text-sm font-medium">Setting</span>
@@ -270,115 +214,89 @@ console.log("Right side state ---->");
                     </nav>
                 </div>
             </aside>
-        )
+        );
     }
 }
 
 function EditBtn({ editOpen, editHandleOpen, data }) {
-    const [value, setValue] = useState({
-        foldername: data
-    });
+    const [value, setValue] = useState({ foldername: data });
     const user = JSON.parse(localStorage.getItem("user"));
     const dispatch = useDispatch();
 
-
-
     return (
         <div className="card flex justify-content-center">
-
             <Dialog open={editOpen} handler={editHandleOpen}>
-                <DialogHeader>Do you want to Edit  Folder Name ?</DialogHeader>
+                <DialogHeader>Do you want to Edit Folder Name?</DialogHeader>
                 <DialogBody>
-                    <Input label='Edit Folder Name'
-                        value={value["foldername"]}
-                        onChange={(e) => setValue({ ...value, ["foldername"]: e.target.value })}
+                    <Input
+                        label='Edit Folder Name'
+                        value={value.foldername}
+                        onChange={(e) => setValue({ ...value, foldername: e.target.value })}
                     />
                     <br />
                 </DialogBody>
                 <DialogFooter>
-                    <Button
-                        variant="text"
-                        color="red"
-                        onClick={editHandleOpen}
-                        className="mr-1"
-                    >
+                    <Button variant="text" color="red" onClick={editHandleOpen} className="mr-1">
                         <span>Cancel</span>
                     </Button>
                     <Button variant="gradient" color="green" onClick={() => {
-
-                        console.log("I am clicked");
-                        const userId = user["userId"];
-
+                        const userId = user.userId;
                         dispatch(NewFolderSlice({
                             url: "/api/v1/folder/create",
                             method: "post",
                             data: {
-                                foldername: value["foldername"],
+                                foldername: value.foldername,
                                 user: userId
-
                             }
-                        }))
-                        editHandleOpen()
+                        }));
+                        editHandleOpen();
                     }}>
                         <span>Save</span>
                     </Button>
                 </DialogFooter>
             </Dialog>
         </div>
-    )
+    );
 }
 
 function ResponsiveDemo({ open, handleOpen }) {
-    const [value, setValue] = useState({
-    });
+    const [value, setValue] = useState({});
     const user = JSON.parse(localStorage.getItem("user"));
     const dispatch = useDispatch();
 
-
-
     return (
         <div className="card flex justify-content-center">
-
             <Dialog open={open} handler={handleOpen}>
-                <DialogHeader>Do you want to create New Folder ?</DialogHeader>
+                <DialogHeader>Do you want to create a New Folder?</DialogHeader>
                 <DialogBody>
-                    <Input label='Folder Name'
-                        value={value["foldername"]}
-                        onChange={(e) => setValue({ ...value, ["foldername"]: e.target.value })}
+                    <Input
+                        label='Folder Name'
+                        value={value.foldername}
+                        onChange={(e) => setValue({ ...value, foldername: e.target.value })}
                     />
                     <br />
                     <Input label='Purpose of Folder' />
                 </DialogBody>
                 <DialogFooter>
-                    <Button
-                        variant="text"
-                        color="red"
-                        onClick={handleOpen}
-                        className="mr-1"
-                    >
+                    <Button variant="text" color="red" onClick={handleOpen} className="mr-1">
                         <span>Cancel</span>
                     </Button>
                     <Button variant="gradient" color="green" onClick={() => {
-
-                        console.log("I am clicked");
-                        const userId = user["userId"];
-
+                        const userId = user.userId;
                         dispatch(NewFolderSlice({
                             url: "/api/v1/folder/create",
                             method: "post",
                             data: {
-                                foldername: value["foldername"],
+                                foldername: value.foldername,
                                 user: userId
-
                             }
-                        }))
-                        handleOpen()
+                        }));
+                        handleOpen();
                     }}>
                         <span>Save</span>
                     </Button>
                 </DialogFooter>
             </Dialog>
         </div>
-    )
+    );
 }
-

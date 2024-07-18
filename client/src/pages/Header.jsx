@@ -1,6 +1,6 @@
 'use client'
 import { Link ,NavLink} from 'react-router-dom'
-import React from 'react'
+import React, { useEffect,useState } from 'react'
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react'
 import Credit from "../components/credit/Credit";
 
@@ -16,7 +16,17 @@ export default function Header() {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
-  const isLogin=localStorage.getItem("user")?true:false;
+  const [isLogin,setLogin]=useState(localStorage.getItem("user")?true:false);
+  useEffect(()=>{
+    
+if(!isLogin && !localStorage.getItem("user")){
+  setLogin(false);
+}
+if(localStorage.getItem("user")){
+  setLogin(true)
+}
+
+  },[localStorage.getItem("user")])
 
 
   return (
@@ -56,7 +66,7 @@ export default function Header() {
         </div>
         <div className="hidden space-x-2 lg:block w-[100%]">
                   {
-                    (!isLogin) ? (
+                    (!localStorage.getItem("user")) ? (
                       <>
                        
                       </>
@@ -66,7 +76,8 @@ export default function Header() {
                       <Link
                       onClick={()=>{
                         localStorage.clear();
-                        location.href="/";
+                        setLogin(false);
+                
                         console.log("Logout")
                       }}
                         className=" rounded-md bg-red-700 px-3 py-2 text-sm text-center font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 w-[20%] focus-visible:outline-red"

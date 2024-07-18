@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginAsync } from "../../features/slice/userSlice";
 import { Link } from 'react-router-dom';
@@ -9,9 +10,12 @@ export default function SignIn() {
   const dispatch = useDispatch();
   const loginData=useSelector((state)=>state.auth);
   const {socket}=useContext(socketContextApi);
+  const navigate=useNavigate();
 
   useEffect(()=>{
-    if(loginData.user){
+    console.log("LOgin data");
+    console.log(JSON.parse(localStorage.getItem("user")))
+    if(JSON.parse(localStorage.getItem("user"))){
       location.href="/dashboard";
     }
   },[loginData])

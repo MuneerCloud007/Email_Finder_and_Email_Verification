@@ -82,7 +82,7 @@ const WebscrapingData = (url1,cookieData) => {
                         "--single-process",
                         "--no-zygote",
                     ],
-                    headless: false,
+                    headless: true,
                     executablePath: process.env.NODE_ENV === "production"
                         ? process.env.PUPPETEER_EXECUTABLE_PATH
                         : await chromium.executablePath,

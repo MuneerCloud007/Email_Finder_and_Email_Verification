@@ -69,9 +69,17 @@ const companyInfoSchema=new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
     },
-    "verifiedEmail":{
+    "email":{
         type:String,
+        default:"not found"
     },
+    "certainty":{
+        type:String,
+        default:"not found"
+    },
+
+    
+
     "dynamicFields": [
         {
             name: String,

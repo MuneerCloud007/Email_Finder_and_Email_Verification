@@ -9,6 +9,16 @@ import mongoose from 'mongoose';
 import companyInfoModel from '../model/companyInfo.js';
 import userSchema from "../model/user.model.js";
 import creditSchema from "../model/credit.model.js";
+import creditModel from '../model/credit.model.js';
+
+
+const CertainityEnum = {
+    VERY_SURE: 'very_sure',
+    ULTRA_SURE: 'ultra_sure',
+    SURE: 'sure',
+    PROBABLE: 'probable',
+};
+
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -23,8 +33,40 @@ function extractDomain(url) {
     return domain;
 }
 
+
+async function makeRequestWithRetry(url, data, headers, maxRetries = 4, delay = 2000) {
+    let retries = 0;
+    while (retries < maxRetries) {
+        try {
+            const response = await axios.post(url, data, { ...headers });
+            return response.data; // Assuming you want to return data upon success
+        } catch (error) {
+            console.error(`Request failed, retrying attempt ${retries + 1}/${maxRetries}`);
+            if (retries < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            retries++;
+            if (retries === maxRetries) {
+                throw new Error(`Max retries reached (${maxRetries}), request failed`);
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 const scrapeController = async (req, res, next) => {
-    const { firstName, lastName, user, position, folder, url, socketId,cookieData} = req.body;
+    const { firstName, lastName, user, position, folder, url, socketId, cookieData } = req.body;
     console.log(req.body);
 
     if (!url) {
@@ -32,12 +74,16 @@ const scrapeController = async (req, res, next) => {
     }
 
     try {
-        // Web scraping has started
-        const company_data = await WebscrapingData(url,cookieData);
+        const credit = await creditModel.findOne({ user: user });
+
+        if (credit.points < 1) {
+            return next(ApiError.badRequest("Insufficient points!!!"));
+        }
+
+        const company_data = await WebscrapingData(url, cookieData);
         console.log("COMPANY DATA");
         console.log(company_data);
 
-        // Email verification is started
         const url1 = 'https://app.icypeas.com/api/email-search';
         const EmailVerifierData = {
             firstname: firstName.toLowerCase(),
@@ -49,7 +95,6 @@ const scrapeController = async (req, res, next) => {
             'Content-Type': 'application/json'
         };
         const response1 = await axios.post(url1, EmailVerifierData, { headers });
-        // console.log(response1.data);
         await delay(2000);
 
         const url2 = "https://app.icypeas.com/api/bulk-single-searchs/read";
@@ -58,66 +103,70 @@ const scrapeController = async (req, res, next) => {
             "mode": "single",
             "id": response1.data["item"]["_id"]
         };
-        const response2 = await axios.post(url2, EmailVerifierData2, { headers });
-        // console.log(response2.data);
-        // console.log("ITEMS Data");
-        // console.log(response2.data["items"][0]["results"]["emails"][0]["email"]);
+        const response2 = await makeRequestWithRetry(url2, EmailVerifierData2, { headers });
+        console.log("Inside the credit site here ____________________________________________________________");
+        console.log(response2.items[0].results);
+        if (Object.values(CertainityEnum).includes(response2.items[0].results.emails?.[0]?.certainty)) {
+           
+            credit.points = Math.max(0, credit.points - 1);
+            const newCredit = await credit.save();
+            console.log("Credit updated:", newCredit);
+        }
 
         const createCompanyInfo = new companyInfoModel({
             firstName,
             lastName,
             position,
             ...company_data,
-            verifiedEmail: response2.data["items"][0]["results"]["emails"][0]["email"]
+            email: response2.items[0].results.emails[0].email || "NOT FOUND",
+            certainty: response2.items[0].results.emails?.[0]?.certainty || "NOT FOUND",
         });
         const newCompanyInfo = await createCompanyInfo.save();
 
-        console.log("New company Info---------------------------------------------------------");
-
         const emailArr = await emailVerificationModel.find({ $and: [{ user: user }, { folder: folder }] });
-        console.log("Email Array ---------------------------------------------------------------------------------------------");
-       
-       let creditData=await creditSchema.findOneAndUpdate(
-            { user: user }, // Filter to find the Credit document by _id
-            { $inc: { points: -1 } }, // Decrement the amount field by amountToDecrement
-            { new: true } // Return the updated document
-        );
-        console.log(creditData);
+        console.log("Email Array found:", emailArr);
 
         let createEmailVerifier;
         if (emailArr.length == 0) {
             createEmailVerifier = new emailVerificationModel({
-                "companyInfo": newCompanyInfo["_id"],
-                "user": user,
-                "folder": folder
+                companyInfo: newCompanyInfo._id,
+                user: user,
+                folder: folder
             });
             createEmailVerifier = await createEmailVerifier.save();
         } else {
             createEmailVerifier = emailArr[0];
-            const dummyValue = await emailVerificationModel.populate(createEmailVerifier, { path: 'companyInfo' });
-            console.log("........................-Dummy value -............................")
-            console.log(dummyValue[0]);
-            const dummyArray = dummyValue.companyInfo[0].dynamicFields.reduce((current, vl) => {
+            console.log("Existing email verifier:", createEmailVerifier);
+
+            const dummyValue = await emailVerificationModel.findById(createEmailVerifier._id).populate('companyInfo').exec();
+            if (!dummyValue.companyInfo) {
+                console.error("No company info found in dummy value.");
+                return next(ApiError.internal('Failed to retrieve company info.'));
+            }
+
+            const dummyArray = dummyValue.length>0 ? dummyValue.companyInfo.dynamicFields.reduce((current, vl) => {
                 current.push({
                     name: vl.name,
                     value: '',
-                    _id: new mongoose.Types.ObjectId()  // Dynamically create _id
+                    _id: new mongoose.Types.ObjectId()
                 });
                 return current;
-            }, []);
+            }, []):[];
+            console.log("dummy Array value is here ::::::");
+            console.log(dummyArray)
 
-            newCompanyInfo["dynamicFields"] = [...dummyArray]; // Correctly handling the population
-            newCompanyInfo["user"]=user;
+            newCompanyInfo.dynamicFields = [...dummyArray];
+            newCompanyInfo.user = user;
             await newCompanyInfo.save();
 
-            createEmailVerifier["companyInfo"].push(newCompanyInfo["_id"]);
+            createEmailVerifier.companyInfo.push(newCompanyInfo._id);
             await createEmailVerifier.save();
         }
 
-        let companyInfo = newCompanyInfo;
-        console.log(companyInfo);
+        const companyInfo = newCompanyInfo;
+        console.log("Final company info:", companyInfo);
 
-        let data = {
+        const data = {
             firstName: companyInfo.firstName,
             lastName: companyInfo.lastName,
             img: companyInfo.img,
@@ -134,16 +183,18 @@ const scrapeController = async (req, res, next) => {
             createdAt: companyInfo.createdAt,
             updatedAt: companyInfo.updatedAt,
             companyInfoId: companyInfo._id,
-            verifiedEmail: response2.data["items"][0]["results"]["emails"][0]["email"]
+            email: response2.items[0].results.emails[0].email || "NOT FOUND",
+            certainty: response2.items[0].results.emails?.[0]?.certainty || "NOT FOUND",
         };
 
-        let key = companyInfo.firstName + " " + companyInfo.lastName;
-        let result = {};
-        result[key] = {
-            id: createEmailVerifier._id,
-            ...data,
-            folder: createEmailVerifier.folder,
-            user: createEmailVerifier.user
+        const key = `${companyInfo.firstName} ${companyInfo.lastName}`;
+        const result = {
+            [key]: {
+                id: createEmailVerifier._id,
+                ...data,
+                folder: createEmailVerifier.folder,
+                user: createEmailVerifier.user
+            }
         };
 
         res.header("Access-Control-Allow-Origin", "*");
@@ -157,7 +208,6 @@ const scrapeController = async (req, res, next) => {
             });
         }
 
-
         return res.status(200).json({
             success: true,
             data: result
@@ -166,7 +216,6 @@ const scrapeController = async (req, res, next) => {
         return next(ApiError.internal(error?.message || 'Failed to scrape the website'));
     }
 };
-
 
 
 const findEmailVerifierController = async (req, res, next) => {
@@ -212,7 +261,8 @@ const findEmailVerifierController = async (req, res, next) => {
                 description: companyInfo.description.replace(/\n/g, ' ').replace(/\s\s+/g, ' ').trim(),
                 header_quater: companyInfo.header_quater,
                 type: companyInfo.type,
-                verifiedEmail: companyInfo["verifiedEmail"] || "Before data",
+                email: companyInfo["email"] || "Before data",
+                certainty: companyInfo["certainty"] || "NOT FOUND",
 
                 createdAt: companyInfo.createdAt,
                 updatedAt: companyInfo.updatedAt,
@@ -434,6 +484,10 @@ const addRow = async (req, res, next) => {
                 revenue: companyInfo.revenue,
                 country: companyInfo.country,
                 description: '',
+                email:companyInfo.email,
+                certainty: companyInfo["certainty"] ,
+
+
                 header_quater: companyInfo.header_quater,
                 type: companyInfo.type,
                 createdAt: companyInfo.createdAt,
@@ -442,21 +496,23 @@ const addRow = async (req, res, next) => {
                 user: userId
             };
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 data: { ...data }
 
 
             })
-            return;
         }
         console.log("I am executing !!!!");
+
         let arrayOfIds = emailDocs.map(doc => doc.companyInfo);
 
         arrayOfIds = arrayOfIds.flat();
+        console.log(arrayOfIds);
 
         const dummyInfo = await companyInfoModel.find({ "_id": arrayOfIds[0] });
         console.log("dummyInfo[0]");
+        console.log(dummyInfo[0]);
         console.log(dummyInfo[0]["dynamicFields"]);
 
         // Assuming dummyInfo[0]["dynamicFields"] is an array of objects

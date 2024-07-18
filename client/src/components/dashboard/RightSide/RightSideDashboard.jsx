@@ -41,7 +41,8 @@ function ReactJsClientSideTable() {
     { field: "position", },
     { field: "website", },
 
-    { field: "verifiedEmail", },
+    { field: "email", },
+    {field:"certainty",},
 
 
 

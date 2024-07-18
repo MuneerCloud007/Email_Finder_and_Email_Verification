@@ -4,6 +4,8 @@ import React, { useEffect } from 'react'
 import CreditTwo from "./CreditTwo"
 import { useDispatch,useSelector } from 'react-redux'
 import {getCreditSlice} from "../../features/slice/emailVerifier";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 function Credit() {
   //Using userId make a api call to backedn to get the credits 
@@ -26,7 +28,10 @@ useEffect(()=>{
 },[user_Id])
 
 if(Credit.loading){
-  return <h1>Loading credit ......</h1>
+  return   <div className="p-4">
+  <Skeleton height={40} width={200} />
+  <Skeleton height={20} width={100} style={{ marginTop: 10 }} />
+</div>
 }
 if(Credit.error.status){
   throw new Error(Credit.error.message);

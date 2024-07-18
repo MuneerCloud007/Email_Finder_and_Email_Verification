@@ -4,10 +4,13 @@ import {Link, useNavigate} from "react-router-dom";
 import { useState } from 'react';
 import {registerAsync} from "../../features/slice/userSlice";
 import { useDispatch, useSelector } from 'react-redux';
+import { Api1 } from '../../features/api/Api';
 
 export default function SignUp() {
   const dispatch=useDispatch();
   const [registerData,setRegisterData]=useState({});
+  const Navigate=useNavigate();
+
   const RegisterFun=(data)=>{
     const newData={
       name:data["UserName"],
@@ -15,21 +18,22 @@ export default function SignUp() {
       password:data["Password"],
     }
     // endpoint:-api/v1/user/ register
-    dispatch(registerAsync({url:"/api/v1/user/register",method:"post",data:newData}))
-  }
-  const Navigate=useNavigate();
+    Api1("/api/v1/user/register","post",newData)
+    .then((data)=>{
+      console.log("Register page!!data");
+      console.log(data);
+      setTimeout(()=>{
+        Navigate("/");
 
-const registerPerson=useSelector((state)=>state.auth);
-console.log(registerPerson);
-useEffect(()=>{
-  if(registerPerson["regiser"].status){
-    alert("user has been register !!!!!");
-    setTimeout(()=>{
-      Navigate("/");
+      },[2000])
 
-    },[3000])
+
+    }).catch((err)=>{
+      console.log(err);
+    })
   }
-},[registerPerson["regiser"].status])
+
+
 
   return (
     <section>
