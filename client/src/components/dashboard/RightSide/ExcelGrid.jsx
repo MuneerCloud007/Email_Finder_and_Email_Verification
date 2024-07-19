@@ -283,8 +283,8 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
 
 
     return (
-        <div className="container my-3 h-[50vh] pb-4">
-            <div className="example-wrapper h-[100%]">
+        <div className="container my-3 h-[60vh] pb-4 ">
+            <div className="example-wrapper h-[80%]">
                 <Dialog open={addColTable} handler={onhandleColTable}>
                     <DialogHeader>Do You want To Add Column?</DialogHeader>
                     <DialogBody>
@@ -362,15 +362,16 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
                 </div>
 
 
-                <div style={gridStyle} className="ag-theme-quartz h-[100%] py-2 ">
+                <div style={gridStyle} className="ag-theme-quartz py-2 ">
                     <AgGridReact
                         ref={gridRef}
                         rowData={rowData}
                         columnDefs={columnDefs}
                         defaultColDef={defaultColDef}
+                        overflow-auto
                         pagination={true}
                         paginationPageSize={5}
-                        domLayout='autoHeight'
+                        domLayout='damLayout'
                         enableRangeSelection={true}
                         suppressMultiRangeSelection={true}
                         onCellValueChanged={onCellValueChanged}

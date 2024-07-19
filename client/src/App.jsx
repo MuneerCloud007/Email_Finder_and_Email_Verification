@@ -73,6 +73,7 @@ function App() {
         <Header />
         <Outlet />
       </div>
+      <Footer/>
     </socketContextApi.Provider>
 
   )

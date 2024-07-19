@@ -31,7 +31,7 @@ function Dashboard() {
 
 
   return (
-    <div className='dashboard flex'>
+    <div className='dashboard flex '>
 
       <SidebarOne
       RightSideState={RightSideState} 
@@ -42,10 +42,8 @@ function Dashboard() {
       {RightSideState == 1 && <div className=' container p-4 mt-3' style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
       <Popup />
 
-        <Suspense fallback={<LoadingSpinner />}>
 
           <ReactJsClientSideTable />
-        </Suspense>
       </div>
       }
       {RightSideState == 2 && <div className=' container p-4 mt-3' style={{ display: "flex", flexDirection: "column" }}>
