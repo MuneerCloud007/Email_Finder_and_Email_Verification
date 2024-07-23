@@ -42,9 +42,14 @@ app.get('/test', (req, res) => {
 
 DbConnection().then(() => {
   const PORT = process.env.PORT || 4000;
-  server.listen(PORT, () => {
+  // Listen on all interfaces
+
+  server.listen(PORT,'0.0.0.0', () => {
     console.log(`Server is listening on port ${PORT}`);
   });
+  
+
+
 }).catch((err) => {
   console.error("There is an issue with the MongoDB connection: ", err);
   process.exit(1);
