@@ -1,130 +1,142 @@
 // src/controllers/webscrapeController.js
 import WebscrapingData from '../webscraping/webscrap.js';
 import ApiError from '../utils/ApiError.js';
-import { URL } from 'url';
-import wrapperFunEmailVerfier from "../email_verfication/emailVerfier.algo.js";
 import axios from "axios"
 import emailVerificationModel from '../model/emailverfier.model.js';
 import mongoose from 'mongoose';
 import companyInfoModel from '../model/companyInfo.js';
-import userSchema from "../model/user.model.js";
-import creditSchema from "../model/credit.model.js";
 import creditModel from '../model/credit.model.js';
-
-
-const CertainityEnum = {
-    VERY_SURE: 'very_sure',
-    ULTRA_SURE: 'ultra_sure',
-    SURE: 'sure',
-    PROBABLE: 'probable',
-};
-
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function extractDomain(url) {
-    // Remove protocol (http, https) and www from URL
-    let domain = url.replace(/(^\w+:|^)\/\//, '').replace('www.', '');
-
-    // Remove path and query string
-    domain = domain.split('/')[0];
-
-    return domain;
-}
-
-
-async function makeRequestWithRetry(url, data, headers, maxRetries = 4, delay = 2000) {
-    let retries = 0;
-    while (retries < maxRetries) {
-        try {
-            const response = await axios.post(url, data, { ...headers });
-            return response.data; // Assuming you want to return data upon success
-        } catch (error) {
-            console.error(`Request failed, retrying attempt ${retries + 1}/${maxRetries}`);
-            if (retries < maxRetries - 1) {
-                await new Promise(resolve => setTimeout(resolve, delay));
-            }
-            retries++;
-            if (retries === maxRetries) {
-                throw new Error(`Max retries reached (${maxRetries}), request failed`);
-            }
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
+import { ProfileScraping } from "../controller/ScrapingFun/Scraping.js";
+import { CertainityEnum, delay, extractDomain, makeRequestWithRetry } from "../helper/helper1.js"
+import { fetchEmailVerification, emailVerificationRequest, formatCompanyData } from "./ScrapingFun/Scraping.js"
 
 
 
 
 const scrapeController = async (req, res, next) => {
-    const { firstName, lastName, user, position, folder, url, socketId, cookieData } = req.body;
-    console.log(req.body);
+    const { firstName, lastName, user, position, folder, url, socketId, cookieData, profile } = req.body;
+    const profileUrl = profile;
+    const ip = req.ip || req.connection.remoteAddress; // Get the IP address from the req object
+    const userAgent = req.headers['user-agent']; // Get the User Agent from the req object
+    const uniqueRoom = `${ip}`; // Create the same unique room identifier
 
-    if (!url) {
-        return next(ApiError.badRequest('URL is required'));
-    }
+
+
+
+
 
     try {
+        console.log("--------------------GOING TO SCRAPE PROFILE PAGE----------------------------");
+        // console.log(uniqueRoom);
+        // console.log(req.body);
+
+        const Profile = await ProfileScraping(profileUrl, cookieData);
+
+        if (!url) {
+            const createCompanyInfo = new companyInfoModel({
+                firstName,
+                lastName,
+                position,
+                "profile": Profile["_id"],
+                email: "not found",
+                certainty: "not found",
+            });
+            const newCompanyInfo = await createCompanyInfo.save();
+
+            const emailArr = await emailVerificationModel.find({ $and: [{ user: user }, { folder: folder }] });
+            let createEmailVerifier;
+            if (emailArr.length == 0) {
+                createEmailVerifier = new emailVerificationModel({
+                    companyInfo: newCompanyInfo._id,
+                    user: user,
+                    folder: folder
+                });
+                createEmailVerifier = await createEmailVerifier.save();
+            } else {
+                createEmailVerifier = emailArr[0];
+                const dummyValue = await emailVerificationModel.findById(createEmailVerifier._id).populate('companyInfo').exec();
+
+                if (!dummyValue.companyInfo) {
+                    throw new Error('Failed to retrieve company info.');
+                }
+
+                let dummyArray
+
+
+                if (dummyValue.companyInfo.dynamicFields?.length > 0) {
+                    dummyArray = dummyValue.companyInfo.dynamicFields.reduce((current, vl) => {
+                        current.push({
+                            name: vl.name,
+                            value: '',
+                            _id: new mongoose.Types.ObjectId()
+                        });
+                        return current;
+                    }, []);
+                }
+                else {
+                    dummyArray = [];
+                }
+
+                newCompanyInfo.dynamicFields = [...dummyArray];
+                newCompanyInfo.user = user;
+                await newCompanyInfo.save();
+
+                createEmailVerifier.companyInfo.push(newCompanyInfo._id);
+                await createEmailVerifier.save();
+            }
+
+            const companyInfo = newCompanyInfo;
+            const data = formatCompanyData(companyInfo, "not found", "not found", Profile);
+
+            const key = `${companyInfo.firstName} ${companyInfo.lastName}`;
+            const result = {
+                [key]: {
+                    id: createEmailVerifier._id,
+                    ...data,
+                    folder: createEmailVerifier.folder,
+                    user: createEmailVerifier.user
+                }
+            };
+
+            return result;
+        }
+
+        // Credit Cutting 
         const credit = await creditModel.findOne({ user: user });
 
         if (credit.points < 1) {
-            return next(ApiError.badRequest("Insufficient points!!!"));
+            throw new Error("Insufficient points!!!");
         }
 
         const company_data = await WebscrapingData(url, cookieData);
-        console.log("COMPANY DATA");
-        console.log(company_data);
+        let emailResponse1
+        let emailResponse2
+        if (company_data["website"]) {
+            emailResponse1 = await emailVerificationRequest(firstName, lastName, company_data["website"]);
+            await delay(4000);
 
-        const url1 = 'https://app.icypeas.com/api/email-search';
-        const EmailVerifierData = {
-            firstname: firstName.toLowerCase(),
-            lastname: lastName.toLowerCase(),
-            domainOrCompany: extractDomain(company_data["website"])
-        };
-        const headers = {
-            'Authorization': '41b965a9f0a544f1aa43df5bcdaf58168a48bf9dfeb648ac8dc4863d5316498b',
-            'Content-Type': 'application/json'
-        };
-        const response1 = await axios.post(url1, EmailVerifierData, { headers });
-        await delay(2000);
+            emailResponse2 = await fetchEmailVerification(emailResponse1.data["item"]["_id"]);
 
-        const url2 = "https://app.icypeas.com/api/bulk-single-searchs/read";
-        const EmailVerifierData2 = {
-            "user": "LUx6tZABOIKatkTjs8LF",
-            "mode": "single",
-            "id": response1.data["item"]["_id"]
-        };
-        const response2 = await makeRequestWithRetry(url2, EmailVerifierData2, { headers });
-        console.log("Inside the credit site here ____________________________________________________________");
-        console.log(response2.items[0].results);
-        if (Object.values(CertainityEnum).includes(response2.items[0].results.emails?.[0]?.certainty)) {
-           
-            credit.points = Math.max(0, credit.points - 1);
-            const newCredit = await credit.save();
-            console.log("Credit updated:", newCredit);
+            if (Object.values(CertainityEnum).includes(emailResponse2?.items[0]?.results.emails?.[0]?.certainty)) {
+                credit.points = Math.max(0, credit.points - 1);
+                await credit.save();
+            }
         }
+
+
 
         const createCompanyInfo = new companyInfoModel({
             firstName,
             lastName,
             position,
             ...company_data,
-            email: response2.items[0].results.emails[0].email || "NOT FOUND",
-            certainty: response2.items[0].results.emails?.[0]?.certainty || "NOT FOUND",
+            "profile": Profile["_id"],
+            email: emailResponse2?.items[0]?.results?.emails[0]?.email || "not found",
+            certainty: emailResponse2?.items[0]?.results.emails?.[0]?.certainty || "not found",
         });
         const newCompanyInfo = await createCompanyInfo.save();
 
         const emailArr = await emailVerificationModel.find({ $and: [{ user: user }, { folder: folder }] });
-        console.log("Email Array found:", emailArr);
 
         let createEmailVerifier;
         if (emailArr.length == 0) {
@@ -136,24 +148,28 @@ const scrapeController = async (req, res, next) => {
             createEmailVerifier = await createEmailVerifier.save();
         } else {
             createEmailVerifier = emailArr[0];
-            console.log("Existing email verifier:", createEmailVerifier);
-
             const dummyValue = await emailVerificationModel.findById(createEmailVerifier._id).populate('companyInfo').exec();
+
             if (!dummyValue.companyInfo) {
-                console.error("No company info found in dummy value.");
-                return next(ApiError.internal('Failed to retrieve company info.'));
+                throw new Error('Failed to retrieve company info.');
+            }
+            let dummyArray
+
+
+            if (dummyValue.companyInfo.dynamicFields?.length > 0) {
+                dummyArray = dummyValue.companyInfo.dynamicFields.reduce((current, vl) => {
+                    current.push({
+                        name: vl.name,
+                        value: '',
+                        _id: new mongoose.Types.ObjectId()
+                    });
+                    return current;
+                }, []);
+            }
+            else {
+                dummyArray = [];
             }
 
-            const dummyArray = dummyValue.length>0 ? dummyValue.companyInfo.dynamicFields.reduce((current, vl) => {
-                current.push({
-                    name: vl.name,
-                    value: '',
-                    _id: new mongoose.Types.ObjectId()
-                });
-                return current;
-            }, []):[];
-            console.log("dummy Array value is here ::::::");
-            console.log(dummyArray)
 
             newCompanyInfo.dynamicFields = [...dummyArray];
             newCompanyInfo.user = user;
@@ -164,28 +180,7 @@ const scrapeController = async (req, res, next) => {
         }
 
         const companyInfo = newCompanyInfo;
-        console.log("Final company info:", companyInfo);
-
-        const data = {
-            firstName: companyInfo.firstName,
-            lastName: companyInfo.lastName,
-            img: companyInfo.img,
-            company: companyInfo.company,
-            position: companyInfo.position,
-            website: companyInfo.website,
-            employees: companyInfo.employees,
-            industry: companyInfo.industry,
-            revenue: companyInfo.revenue,
-            country: companyInfo.country,
-            description: companyInfo.description.replace(/\n/g, ' ').replace(/\s\s+/g, ' ').trim(),
-            header_quater: companyInfo.header_quater,
-            type: companyInfo.type,
-            createdAt: companyInfo.createdAt,
-            updatedAt: companyInfo.updatedAt,
-            companyInfoId: companyInfo._id,
-            email: response2.items[0].results.emails[0].email || "NOT FOUND",
-            certainty: response2.items[0].results.emails?.[0]?.certainty || "NOT FOUND",
-        };
+        const data = formatCompanyData(companyInfo, emailResponse2?.items[0].results?.emails[0]?.email || "not found", emailResponse2?.items[0]?.results.emails?.[0]?.certainty || "not found", Profile);
 
         const key = `${companyInfo.firstName} ${companyInfo.lastName}`;
         const result = {
@@ -197,15 +192,31 @@ const scrapeController = async (req, res, next) => {
             }
         };
 
+
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
+
+
+
         if (socketId) {
-            req.io.emit("postEmailVerifier", {
+
+            // Check if the room exists
+            const roomExists = req.io.sockets.adapter.rooms.has(uniqueRoom);
+
+            if (roomExists) {
+                console.log(`Room ${uniqueRoom} exists. Adding socket ${socketId} to the room.`);
+            } else {
+                console.log(`Room ${uniqueRoom} does not exist. Creating and adding socket ${socketId} to the room.`);
+            }
+
+            req.io.to(uniqueRoom).emit('postEmailVerifier', {
                 success: true,
                 data: result
             });
+
+
         }
 
         return res.status(200).json({
@@ -220,8 +231,7 @@ const scrapeController = async (req, res, next) => {
 
 const findEmailVerifierController = async (req, res, next) => {
     const { user, folder } = req.body;
-    console.log(user);
-    console.log(folder);
+  
     try {
         if (!user) {
             next(ApiError.notFound("There is no user"));
@@ -233,8 +243,8 @@ const findEmailVerifierController = async (req, res, next) => {
 
 
 
-        console.log("POPULATE COMPANY INFO")
-        console.log(arr);
+        // console.log("POPULATE COMPANY INFO")
+        // console.log(arr);
 
         if (!arr) {
             return res.status(200).json({
@@ -286,7 +296,7 @@ const findEmailVerifierController = async (req, res, next) => {
             return current;
         }, {});
 
-        console.log(result);
+        // console.log(result);
         res.status(200).json({
             success: true,
             data: result
@@ -313,7 +323,7 @@ const findEmailVerifierById = async (req, res, next) => {
             throw new Error(ApiError.badRequest("Please provide a correct objectId"))
 
         }
-        console.log(data);
+        // console.log(data);
         const groupedData = {};
 
         groupedData[data.url] = data;
@@ -346,10 +356,10 @@ const updateByIdCell = async (req, res, next) => {
     const { colName, colValue, colId } = req.body;
     let updateData = []
     console.log("Update BY ID Cell---------------------")
-    console.log(userId);
-    console.log(colName);
-    console.log(colValue);
-    console.log(colId);
+    // console.log(userId);
+    // console.log(colName);
+    // console.log(colValue);
+    // console.log(colId);
 
     if (!userId) {
         next(ApiError.badRequest("Please provide a objectId"))
@@ -357,8 +367,8 @@ const updateByIdCell = async (req, res, next) => {
     try {
         let updateData;
         if (!colName.startsWith("custom-column-")) {
-            console.log(colName);
-            console.log(colValue);
+            // console.log(colName);
+            // console.log(colValue);
             const update = {
                 $set: {
                     [colName]: colValue
@@ -466,6 +476,8 @@ const addRow = async (req, res, next) => {
             const createEmailVerifier = await emailVerificationModel({
                 "user": userId,
                 "folder": folder,
+                "certainty": "",
+                "email": "",
                 "companyInfo": companyInfo["_id"]
 
             })
@@ -484,8 +496,8 @@ const addRow = async (req, res, next) => {
                 revenue: companyInfo.revenue,
                 country: companyInfo.country,
                 description: '',
-                email:companyInfo.email,
-                certainty: companyInfo["certainty"] ,
+                email: companyInfo.email,
+                certainty: companyInfo["certainty"],
 
 
                 header_quater: companyInfo.header_quater,
@@ -579,17 +591,24 @@ const addRow = async (req, res, next) => {
 }
 const removeRow = async (req, res, next) => {
     try {
-        const { data } = req.body;
+        const { data, folder, user } = req.body;
         console.log("I AM INSEIDE ROW DELETE");
         if (!data) {
             next(ApiError.badRequest("Please provide a please deletion array"))
         }
+        // console.log(data);
 
 
         const deletionPromises = data.map(id => companyInfoModel.findByIdAndDelete(id));
+        const CatcheDataPromises = data.map(id => emailVerificationModel.updateOne(
+            { $and: [{ folder: folder }, { user: user }] },
+            { $pull: { companyInfo: id } }
+        ))
 
         // Wait for all deletions to complete
         const results = await Promise.all(deletionPromises);
+        const catcheResult = await Promise.all(CatcheDataPromises);
+        // console.log(catcheResult);
         res.status(200).json({
             success: true,
             data: results

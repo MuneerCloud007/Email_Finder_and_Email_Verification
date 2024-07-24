@@ -77,6 +77,10 @@ const companyInfoSchema=new mongoose.Schema({
         type:String,
         default:"not found"
     },
+    "profile":{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Profile"
+    },
 
     
 

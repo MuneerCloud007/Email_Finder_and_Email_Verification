@@ -44,6 +44,9 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
     const { username, password, socketId } = req.body;
     console.log(req.body);
+    const ip = req.ip || req.connection.remoteAddress; // Get the IP address from the req object
+    const userAgent = req.headers['user-agent']; // Get the User Agent from the req object
+    const uniqueRoom = `${ip}`; // Create the same unique room identifier
     try {
         const user = await User.findOne({ username });
         if (!user) {
@@ -63,18 +66,33 @@ const login = async (req, res, next) => {
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false });
         console.log(user);
 
-        if (socketId) {
-            console.log("I am inside login socketId");
-            req.io.emit("LoginUser", {
-                success: true,
-                token,
-                refreshToken,
-                userId: user["_id"]
+      
+            if (socketId) {
 
-            })
+                // Check if the room exists
+                const roomExists = req.io.sockets.adapter.rooms.has(uniqueRoom);
+    
+                if (roomExists) {
+                    console.log(`Room ${uniqueRoom} exists. Adding socket ${socketId} to the room.`);
+                } else {
+                    console.log(`Room ${uniqueRoom} does not exist. Creating and adding socket ${socketId} to the room.`);
+                }
+    
+                req.io.to(uniqueRoom).emit('LoginUser', {
+                    success: true,
+                    token,
+                    refreshToken,
+                    email:user["email"],
+                    username:username,
+                    userId: user["_id"]
+    
+                });
+    
+    
+            }
 
 
-        }
+        
         res.json({ message: "user login successfully", token, refreshToken, userId: user["_id"] });
     } catch (err) {
         next(err);

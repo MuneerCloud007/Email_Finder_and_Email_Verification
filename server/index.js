@@ -14,6 +14,8 @@ import { createServer } from "http";
 import { fileURLToPath } from 'url';
 import fileUploadApi from "./src/api/fileUpload.api.js";
 import creditApi from './src/api/credit.api.js';
+import autoWebscraping from './src/api/autoWebscraping.api.js'
+import api from './src/api/emailVerfier.api.js';
 
 dotenv.config();
 
@@ -35,6 +37,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// Enable Express to trust the proxy
+app.set('trust proxy', true);
 
 app.get('/test', (req, res) => {
   res.send('Server is running!');
@@ -60,10 +64,30 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
+  const ip = socket.request.headers['x-forwarded-for'] || socket.handshake.address;
+  const uniqueRoom = `${ip}`; // Create a unique room identifier
+
+  console.log(`New connection: IP = ${ip}`);
   console.log('New client connected:', socket.id);
+
+
+   // Check if the room exists
+   const roomExists = io.sockets.adapter.rooms.has(uniqueRoom);
+
+   if (roomExists) {
+     console.log(`Room ${uniqueRoom} exists. Adding socket ${socket.id} to the room.`);
+   } else {
+     console.log(`Room ${uniqueRoom} does not exist. Creating and adding socket ${socket.id} to the room.`);
+   }
+ 
+
+  // Join the unique room
+  socket.join(uniqueRoom);
 
   socket.on('disconnect', (reason) => {
     console.log('Client disconnected:', reason);
+    socket.leave(uniqueRoom);
+
   });
 
   socket.on('messageFromClient', ({ data, name, socketId }) => {
@@ -78,11 +102,13 @@ io.on('connection', (socket) => {
 app.use(socketIoMiddleware(io));
 
 // Route
-app.use("/api/v1/user", userApi);  
-app.use("/api/v1/emailVerifier", emailVerifier); 
+app.use("/api/v1/user", userApi);     
+app.use("/api/v1/emailVerifier", emailVerifier);  //  
 app.use("/api/v1/folder", folderApi);   
 app.use("/api/v1/file",fileUploadApi); 
 app.use("/api/v1/credit",creditApi);
+api.use("/api/v1/autoWebscraping",autoWebscraping);
+
 // Route to emit message
 app.get('/emit-message', (req, res) => {
   const message = "Hello from /emit-message route!";

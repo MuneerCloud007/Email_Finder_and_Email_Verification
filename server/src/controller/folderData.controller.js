@@ -1,8 +1,11 @@
 import ApiError from "../utils/ApiError.js";
 import FolderSchema from "../model/folder.model.js"
+import emailVerificationModel from "../model/emailverfier.model.js";
+import companyInfo from "../model/companyInfo.js";
 const createFolder = async (req, res, next) => {
     try {
         const { foldername, user } = req.body;
+
         if (!foldername) {
             throw new Error(ApiError.notFound("Folder name is not found"))
 
@@ -12,7 +15,6 @@ const createFolder = async (req, res, next) => {
             user: user
         })
         await newFolder.save()
-        req.io.emit('btnLoading', 'New Folder is created make a api call');
 
         res.status(201).json({
             success: true,
@@ -48,6 +50,9 @@ const getAllFolder = async (req, res, next) => {
 const updateFolderById = async (req, res, next) => {
     try {
         const { currentFolder, newFolder, socketId } = req.body;
+        const ip = req.ip || req.connection.remoteAddress; // Get the IP address from the req object
+        const userAgent = req.headers['user-agent']; // Get the User Agent from the req object
+        const uniqueRoom = `${ip}`; // Create the same unique room identifier
         
         if (!currentFolder || !newFolder) {
             return next(ApiError.badRequest("Please provide the folders"));
@@ -60,11 +65,24 @@ const updateFolderById = async (req, res, next) => {
             return next(ApiError.badRequest("Please provide a valid ID"));
         }
 
+       
         if (socketId) {
-            req.io.emit('UpdateFolder', {
+
+            // Check if the room exists
+            const roomExists = req.io.sockets.adapter.rooms.has(uniqueRoom);
+
+            if (roomExists) {
+                console.log(`Room ${uniqueRoom} exists. Adding socket ${socketId} to the room.`);
+            } else {
+                console.log(`Room ${uniqueRoom} does not exist. Creating and adding socket ${socketId} to the room.`);
+            }
+
+            req.io.to(uniqueRoom).emit('UpdateFolder', {
                 success: true,
                 data: docs
             });
+
+
         }
 
         return res.status(200).json({
@@ -81,12 +99,27 @@ const deleteFolder = async (req, res, next) => {
     try {
         const { id } = req.params;
         if (!id) {
-            throw new Error(ApiError.badRequest("Pls provide a valid id"));
+            throw  ApiError.badRequest("Pls provide a valid id");
         }
         const data = await FolderSchema.findByIdAndDelete(id);
         if (!data) {
             throw new Error(ApiError.badRequest("Pls provide a valid id"));
         }
+
+        const folderEmail = await emailVerificationModel.findOne({ folder: data._id });
+        console.log("FOlder email here !!!!");
+        console.log(folderEmail);
+  
+        if (folderEmail) {
+            if(folderEmail.companyInfo.length>0){
+          await Promise.all(folderEmail.companyInfo.map(async (vl) => {
+            await companyInfo.findById(vl); 
+          }));
+        }
+    
+          await emailVerificationModel.deleteOne({ folder: folderEmail.folder });
+        }
+        
         res.status(200).json({
             success: true,
             data: data

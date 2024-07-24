@@ -12,6 +12,7 @@ const getCredit = async (req, res, next) => {
         if (!credit) {
             next(ApiError.badRequest("No credit found with this id"));
         }
+        console.log(credit);
         res.status(200).json({
             success: true,
             data: credit

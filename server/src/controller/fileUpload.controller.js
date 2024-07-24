@@ -109,12 +109,18 @@ const FileUpload = async (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
-    const {id}=req.params;
+    const {id,socket}=req.params;
+    console.log("Socket !!!!");
+    console.log(socket);
+    const ip = req.ip || req.connection.remoteAddress; // Get the IP address from the req object
+    const userAgent = req.headers['user-agent']; // Get the User Agent from the req object
+    const uniqueRoom = `${ip}`; // Create the same unique room identifier
     
 
-    const fileBuffer = req.file.buffer;
 
     try {
+        const fileBuffer = req.file.buffer;
+
         const credit=await creditModel.findOne({user:id});
 
         // Parse the Excel file
@@ -181,10 +187,26 @@ const FileUpload = async (req, res) => {
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
 
-        req.io.emit("updateCredit", {
-            success: true,
-            data: newCredit
-        });
+       
+        
+        if (socket) {
+
+            // Check if the room exists
+            const roomExists = req.io.sockets.adapter.rooms.has(uniqueRoom);
+
+            if (roomExists) {
+                console.log(`Room ${uniqueRoom} exists. Adding socket ${socket} to the room.`);
+            } else {
+                console.log(`Room ${uniqueRoom} does not exist. Creating and adding socket ${socket} to the room.`);
+            }
+
+            req.io.to(uniqueRoom).emit('updateCredit', {
+                success: true,
+                data: newCredit
+            });
+
+
+        }
 
 
         res.status(200).send(newFileBuffer);

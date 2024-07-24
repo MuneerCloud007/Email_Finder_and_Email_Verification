@@ -4,6 +4,9 @@ const api = express.Router();
 import { scrapeController,findEmailVerifierController,findEmailVerifierById,updateByIdCell,addColumn,companyInfo,postEmailTableData,
     addRow,removeRow
 } from "../controller/emailverfier.controller.js";
+import {autoWebscraping,ProfileScraping} from "../controller/autoWebscraping.controller.js";
+
+
 import checkAuthorization from "../utils/isAuthorized.js";
 
 // Define your routes
@@ -16,6 +19,9 @@ api.get("/getAll/companyInfo",companyInfo)
 api.post("/post/table",postEmailTableData);
 api.delete("/delete/rowData",removeRow);
 api.route("/add/column").post(addColumn);
+api.post("/autoWebscraping",autoWebscraping)
+api.post("/profile",ProfileScraping);
+
 
 // Export the router
 export default  api;

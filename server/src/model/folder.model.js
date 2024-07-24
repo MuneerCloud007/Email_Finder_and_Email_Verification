@@ -1,5 +1,6 @@
 import mongoose, { mongo } from "mongoose";
-
+import emailVerificationModel from "./emailverfier.model.js";
+import companyInfo from "./companyInfo.js";
 
 const FolderSchema=new mongoose.Schema({
 FolderName:{type:String,required:true},
