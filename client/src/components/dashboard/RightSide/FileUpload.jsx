@@ -76,7 +76,7 @@ const FileUpload = () => {
         
         
             const user_Id=user["userId"];
-            const response = await axios.post(`/api/v1/file/upload/${user_Id}`, formData, {
+            const response = await axios.post(`/api/v1/file/upload/${user_Id}/${localStorage.getItem("socket")}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

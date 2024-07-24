@@ -23,6 +23,7 @@ function App() {
     socket.on("connect", () => {
       console.log("Socket is connected");
       console.log("Socket ID:", socket.id);
+      localStorage.setItem("socket",socket.id)
 
 
       socket.on("postEmailVerifier", async ({ success, data }) => {

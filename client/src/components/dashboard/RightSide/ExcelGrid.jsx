@@ -209,15 +209,19 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
             console.log("SECLECTED NODES!!!");
             console.log(vl.data)
         });
+        console.log("DELETE ROW ACTION");
+        console.log(selectedNodes);
         const selectedIds = selectedNodes.map(node => node.data["id"]);
         console.log("Selected Id for delete rows");
         console.log(selectedIds);
+        const folder=JSON.parse(localStorage.getItem("Folder"))["_id"];
+        const user=JSON.parse(localStorage.getItem("user"))["userId"];
 
         ///delete/table
 
         Api1(`/api/v1/emailVerifier/delete/rowData`,
             "delete",
-            {data:selectedIds}
+            {data:selectedIds,folder,user}
            ).then((data) => {
             console.log("DELETED ROW");
             console.log(data);
@@ -314,7 +318,22 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
                         <Button
                             variant="gradient"
                             color="green"
-                            onClick={() => addColumn(inputData.col)}
+                            onClick={() => {
+                                if (gridRef.current && gridRef.current.api) {
+                                    const rowCount = gridRef.current.api.getDisplayedRowCount();
+                                    console.log('Number of rows:', rowCount);
+                                    if(rowCount>0){
+                                        addColumn(inputData.col)
+
+
+                                    }
+                                    else{
+                                        alert("No data found !!!!");
+                                    }
+                                    setInputData({ ...inputData, col:undefined })
+                                  }
+                                
+                                }}
                         >
                             <span>Confirm</span>
                         </Button>
@@ -344,7 +363,19 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
                 </Dialog>
                 <div className="div flex justify-end pr-2 pb-4">
                     <Button className="mt-4" color="green" onClick={() => {
-                        handleOpen(rowData);
+                        if (gridRef.current && gridRef.current.api) {
+                            const rowCount = gridRef.current.api.getDisplayedRowCount();
+                            console.log('Number of rows:', rowCount);
+                            if(rowCount>0){
+                                handleOpen(rowData);
+
+
+
+                            }
+                            else{
+                                alert("No data foudnd can't export !!!!");
+                            }
+                          }
                     }}>
                         EXPORT
                     </Button>

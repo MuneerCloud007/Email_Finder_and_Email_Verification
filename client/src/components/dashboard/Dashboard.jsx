@@ -9,6 +9,7 @@ import EmailVerifier from "./RightSide/Bulk Xls/EmailVerifier.jsx";
 import DomainFinder from "./RightSide/Bulk Xls/DomainFinder.jsx";
 import Setting from "./RightSide/customization/Setting.jsx";
 import Theme from "./RightSide/customization/Theme.jsx"
+import NotDeveloped from "../../pages/Notdeveloped.jsx"
 const LoadingSpinner = () => {
   return (
     <div className="flex justify-center items-center h-32">
@@ -31,7 +32,7 @@ function Dashboard() {
 
 
   return (
-    <div className='dashboard flex '>
+    <div className='dashboard flex  my-4 '>
 
       <SidebarOne
       RightSideState={RightSideState} 
@@ -54,19 +55,19 @@ function Dashboard() {
       }
 
 {RightSideState == 3 && <div className=' container p-4 mt-3' style={{ display: "flex", flexDirection: "column" }}>
-        <EmailVerifier/>
+        <NotDeveloped/>
 
 
       </div>
       }
       {RightSideState == 4 && <div className=' container p-4 mt-3' style={{ display: "flex", flexDirection: "column" }}>
-        <DomainFinder/>
+        <NotDeveloped/>
 
 
       </div>
       }
       {RightSideState == 5 && <div className=' container p-4 mt-3' style={{ display: "flex", flexDirection: "column" }}>
-        <Theme/>
+        <NotDeveloped/>
 
 
       </div>
