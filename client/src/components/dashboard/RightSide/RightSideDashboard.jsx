@@ -38,8 +38,7 @@ function ReactJsClientSideTable() {
     {
       field: "company",
     },
-    { field: "position", },
-    { field: "website", },
+   
 
     { field: "email", },
     {field:"certainty",},
@@ -82,6 +81,8 @@ function ReactJsClientSideTable() {
 
   const [customColumn, setCustomColumn] = useState();
   let dummyColumn = [];
+  const [NewDataFormat,setNewDataFormat]=useState([]);
+
 
 
 
@@ -91,7 +92,7 @@ function ReactJsClientSideTable() {
     console.log("GRID READY !!!!");
 
 
-    fetch('http://localhost:5000/api/v1/emailVerifier/getAll', {
+    fetch('https://test.onlylwc.com/api/v1/emailVerifier/getAll', {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -105,17 +106,18 @@ function ReactJsClientSideTable() {
         setColumnDefs(initailColumnDef);
         return resp.json()
       })
-      .then((data) => {
+      .then(({data,success}) => {
         console.log("DATA")
         console.log(data);
-        const arrKey = Object.keys(data["data"]);
+        // const arrKey = Object.keys(data["data"]);
 
         let newArray = []
 
 
-        arrKey.map((key) => {
-          newArray = [...newArray, data["data"][key]]
-        })
+        // arrKey.map((key) => {
+        //   newArray = [...newArray, data["data"][key]]
+        // })
+        newArray=[...data];
         console.log("custom column!!!");
 
 
@@ -181,7 +183,7 @@ function ReactJsClientSideTable() {
               <span>Cancel</span>
             </Button>
             <Button variant="gradient" color="green" onClick={() => {
-              convertToExcel(rowData);
+              convertToExcel(NewDataFormat);
               handleOpen();
 
             }}>
@@ -199,6 +201,7 @@ function ReactJsClientSideTable() {
           folder={folder}
           rowData={rowData}
           handleOpen={handleOpen}
+          setNewDataFormat={setNewDataFormat}
           setRowData={setRowData}
           dummyColumn={dummyColumn}
           customColumn={customColumn}

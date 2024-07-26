@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllFolderSlice, NewFolderSlice, updateFolderSlice, deleteFolderSlice } from "../../../features/slice/emailVerifier";
-import { Plus, Atom, Brush, Wrench } from 'lucide-react';
+import { Plus, Atom, Brush, Wrench,Mail } from 'lucide-react';
 import {
     Button,
     Dialog,
@@ -17,6 +17,7 @@ import {
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import "./Left.css";
+import {renameFolderSlice} from "../../../features/slice/emailVerifier";
 
 export default function SidebarOne({ RightSideState, setRightSideState }) {
 
@@ -160,11 +161,12 @@ export default function SidebarOne({ RightSideState, setRightSideState }) {
                                                 </MenuList>
                                             </div>
                                         </Menu>
+                                        <EditBtn editHandleOpen={editHandleOpen} editOpen={editFolder} data={{id:_id,data:FolderName}} />
+
                                     </div>
                                 );
                             })}
                         </div>
-                        <EditBtn editHandleOpen={editHandleOpen} editOpen={editFolder} data={"something"} />
                         <div className="space-y-3">
                             <label className="px-3 text-xs font-semibold uppercase text-gray-900">
                                 Bulk Xls
@@ -174,21 +176,21 @@ export default function SidebarOne({ RightSideState, setRightSideState }) {
                                 href="#"
                                 onClick={() => setRightSideState(2)}
                             >
-                                <Brush className="h-5 w-5" aria-hidden="true" />
+                                <Mail className="h-5 w-5" aria-hidden="true" />
                                 <span className="mx-2 text-sm font-medium">Email Finder</span>
                             </a>
                             <a
                                 className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${RightSideState === 3 ? "bg-blue-600 text-white" : ""}`}
                                 onClick={() => setRightSideState(3)}
                             >
-                                <Brush className="h-5 w-5" aria-hidden="true" />
+                                <Mail className="h-5 w-5" aria-hidden="true" />
                                 <span className="mx-2 text-sm font-medium">Email Verifier</span>
                             </a>
                             <a
                                 className={`flex transform items-center rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${RightSideState === 4 ? "bg-blue-600 text-white" : ""}`}
                                 onClick={() => setRightSideState(4)}
                             >
-                                <Wrench className="h-5 w-5" aria-hidden="true" />
+                                <Mail className="h-5 w-5" aria-hidden="true" />
                                 <span className="mx-2 text-sm font-medium">Domain Finder</span>
                             </a>
                         </div>
@@ -219,9 +221,14 @@ export default function SidebarOne({ RightSideState, setRightSideState }) {
 }
 
 function EditBtn({ editOpen, editHandleOpen, data }) {
-    const [value, setValue] = useState({ foldername: data });
+    const {id}=data;
+    const [value, setValue] = useState({foldername:data.data });
     const user = JSON.parse(localStorage.getItem("user"));
     const dispatch = useDispatch();
+
+  
+
+    console.log(value.foldername);
 
     return (
         <div className="card flex justify-content-center">
@@ -236,19 +243,25 @@ function EditBtn({ editOpen, editHandleOpen, data }) {
                     <br />
                 </DialogBody>
                 <DialogFooter>
-                    <Button variant="text" color="red" onClick={editHandleOpen} className="mr-1">
+                    <Button variant="text" color="red" onClick={()=>{
+                        setValue({foldername:data.data});
+                        editHandleOpen()}} className="mr-1">
                         <span>Cancel</span>
                     </Button>
                     <Button variant="gradient" color="green" onClick={() => {
                         const userId = user.userId;
-                        dispatch(NewFolderSlice({
-                            url: "/api/v1/folder/create",
-                            method: "post",
-                            data: {
-                                foldername: value.foldername,
-                                user: userId
-                            }
+                        if(value.foldername.length>0){
+                        dispatch(renameFolderSlice({
+                            url: `/api/v1/folder/rename/${id}`,
+                            method: "put",
+                            data: {name:value.foldername}
+                          
                         }));
+                        setValue({foldername:data.data});
+
+
+                    }
+
                         editHandleOpen();
                     }}>
                         <span>Save</span>

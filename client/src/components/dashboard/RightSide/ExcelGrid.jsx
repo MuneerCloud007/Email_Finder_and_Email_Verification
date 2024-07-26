@@ -32,7 +32,7 @@ ModuleRegistry.registerModules([
     SetFilterModule,
 ]);
 
-const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpen, dummyColumn, columnDefs, setColumnDefs }) => {
+const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpen, dummyColumn, columnDefs, setColumnDefs,setNewDataFormat }) => {
     const gridRef = useRef();
     let gridApi = useRef();
     const [addColTable, setColTable] = useState(false);
@@ -211,7 +211,7 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
         });
         console.log("DELETE ROW ACTION");
         console.log(selectedNodes);
-        const selectedIds = selectedNodes.map(node => node.data["id"]);
+        const selectedIds = selectedNodes.map(node => node.data["_id"]);
         console.log("Selected Id for delete rows");
         console.log(selectedIds);
         const folder=JSON.parse(localStorage.getItem("Folder"))["_id"];
@@ -225,7 +225,7 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
            ).then((data) => {
             console.log("DELETED ROW");
             console.log(data);
-            setRowData(rowData.filter(row => !selectedIds.includes(row["id"])));
+            setRowData(rowData.filter(row => !selectedIds.includes(row["_id"])));
             }).catch((err) => console.log(err))
     };
 
@@ -255,17 +255,20 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
 
 
         const data = {
-            colId: params.data["id"],
+            colId: params.data["_id"],
             colName: changedColumn,
             oldValue: oldValue,
             colValue: newValue
         }
         console.log(data);
         if (data.colId) {
+            console.log("DATA COLID IS HERE !!!!");
+const user=JSON.parse(localStorage.getItem("user"));
+            console.log(params.data.user);
 
 
             Api1(
-                `/api/v1/emailVerifier/put/cell/${params.data.user}`,
+                `/api/v1/emailVerifier/put/cell/${user["userId"]}`,
                 "put",
                 { ...data }
 
@@ -367,7 +370,21 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
                             const rowCount = gridRef.current.api.getDisplayedRowCount();
                             console.log('Number of rows:', rowCount);
                             if(rowCount>0){
-                                handleOpen(rowData);
+                                const newData = rowData.reduce((newValue, value) => {
+                                    newValue.push({
+                                        firstName: value["firstName"],
+                                        lastName: value["lastName"],
+                                        email: value["email"],
+                                        domain: value["company"],
+                                        certainty: value["certainty"]
+                                    });
+                                    return newValue;
+                                }, []);
+                                
+                                console.log("newData");
+                                console.log(newData);
+                                setNewDataFormat(newData);
+                                handleOpen(newData);
 
 
 
@@ -381,9 +398,7 @@ const GridExample = ({ user, folder, onGridReady, rowData, setRowData, handleOpe
                     </Button>
                 </div>
                 <div className=' flex justify-end px-2 py-3 gap-3'>
-                    <Button className="mt-4" color="teal" onClick={onhandleColTable}>
-                        Add Column
-                    </Button>
+                  
                     <Button className="mt-4" color="teal" onClick={onhandleRowTable}>
                         Add Row
                     </Button>

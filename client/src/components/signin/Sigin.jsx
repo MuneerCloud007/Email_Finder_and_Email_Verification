@@ -4,12 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginAsync } from "../../features/slice/userSlice";
 import { Link } from 'react-router-dom';
-import socketContextApi from '../../contextApi/SocketContextApi';
 export default function SignIn() {
   const [data, setData] = useState({});
   const dispatch = useDispatch();
   const loginData=useSelector((state)=>state.auth);
-  const {socket}=useContext(socketContextApi);
   const navigate=useNavigate();
 
   useEffect(()=>{
@@ -107,13 +105,11 @@ export default function SignIn() {
 
 
                       console.log("I am inside in login bar");
-                      console.log(socket)
                       dispatch(loginAsync({url:"/api/v1/user/login",
                         method:"post",
                       data:{
                         username:data["UserName"],
                         password:data["Password"],
-                        socketId:socket.id
                       }
 
 

@@ -48,6 +48,19 @@ export const NewFolderSlice = createAsyncThunk("/api/Folder/create", async (post
   }
 })
 
+export const renameFolderSlice=createAsyncThunk("/api/Folder/Rename",async (postData,thunkApi)=>{
+  try{
+    const {url,method,data}=postData;
+    const response=await Api1(url,method,data);
+    return response.data;
+
+  }
+  catch(err){
+    throw thunkApi.reject(err);
+
+  }
+})
+
 export const updateFolderSlice = createAsyncThunk("/api/Folder/update", async (postData, thunkApi) => {
   try {
     const { url, method, data } = postData;
@@ -254,6 +267,30 @@ const emailVerifierSlice = createSlice({
       state.Credit.error.status=false;
       state.Credit.error.message=payload;
     })
+   
+    builder.addCase(renameFolderSlice.fulfilled,(state,{payload})=>{
+      const { _id } = payload.data;
+      console.log("This is payload for renameFolderSlcie");
+      console.log(payload);
+      const index = state.FolderData.data.findIndex((item) => item._id === _id);
+
+      console.log("FOLDER DATA");
+      console.log(state.FolderData.data);
+      console.log("INDEX of folder = "+index);
+
+
+
+      state.FolderData.data[index].FolderName=payload.data.FolderName;
+
+      
+    })
+    builder.addCase(renameFolderSlice.rejected,(state,{payload})=>{
+      state.FolderData.error.error=true
+      state.FolderData.error.message=payload?.message || "Rename time folder something went wrong"
+
+      
+    })
+
 
 
 

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from '../../../utils/Proxy';
 import * as XLSX from 'xlsx';
-
+import {getCreditSlice} from "../../../features/slice/emailVerifier";
+import { useDispatch } from 'react-redux';
 const FileUpload = () => {
+    const dispatch=useDispatch();
     const [selectedFile, setSelectedFile] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -36,9 +38,9 @@ const FileUpload = () => {
 
                 const requiredColumns = ['firstName', 'lastName', 'website', 'domain'];
                 const hasRequiredColumns = requiredColumns.some(col => headers.includes(col)) &&
-                    headers.includes('firstName') &&
-                    headers.includes('lastName') &&
-                    (headers.includes('website') || headers.includes('domain'));
+                    headers[0]=='firstName' &&
+                    headers[1]=='lastName' &&
+                    (headers[2]=='website' || headers[2]=='domain');
 
                 if (!hasRequiredColumns) {
                     reject('The uploaded file must contain firstName, lastName, and either website or domain columns.');
@@ -72,11 +74,13 @@ const FileUpload = () => {
 
         try {
             const user=JSON.parse(localStorage.getItem("user"));
+            const folder=JSON.parse(localStorage.getItem("Folder"));
+            
         
         
         
             const user_Id=user["userId"];
-            const response = await axios.post(`/api/v1/file/upload/${user_Id}/${localStorage.getItem("socket")}`, formData, {
+            const response = await axios.post(`/api/v1/file/upload/${user_Id}/${"Hello"}/${folder["_id"]}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -91,6 +95,24 @@ const FileUpload = () => {
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
+            setTimeout(()=>{
+                if(response.data){
+                    const user=JSON.parse(localStorage.getItem("user"));
+                    const folder=JSON.parse(localStorage.getItem("Folder"));
+                    
+                
+                
+                
+                    const user_Id=user["userId"];
+                    if(user_Id){
+                        dispatch(getCreditSlice({
+                          url:`/api/v1/credit/get/${user_Id}`,
+                          method:"get",
+                        }))
+                        }
+
+                }
+            },[3000])
 
             setErrorMessage(null);
         } catch (error) {
